@@ -5,23 +5,14 @@
 # 
 # CURRENT: Rayleigh wave calculation based off of Aki&Richards Ch 7, homogeneous half-space
 
-# In[1]:
-
-
 import numpy as np
 import gc
 import scipy.optimize as so
 import scipy.interpolate as si
 
 
-# In[2]:
-
-
 def alpha(phaseVel, waveSpeed):
     return np.sqrt(1 - (phaseVel**2 / waveSpeed**2), dtype='complex')
-
-
-# In[3]:
 
 
 def rayleigh_function(phaseVel, c_s, c_p):
@@ -39,9 +30,6 @@ def rayleigh_function(phaseVel, c_s, c_p):
     return RR
 
 
-# In[4]:
-
-
 def rayleigh_function_prime(phaseVel, c_s, c_p):
     '''
     returns values of gradient of Rayleigh function
@@ -56,9 +44,6 @@ def rayleigh_function_prime(phaseVel, c_s, c_p):
     return dRR_dc
 
 
-# In[5]:
-
-
 def find_phaseVel(c_s, c_p):
     '''
     returns phase velocity of fundamental mode for surface waves by finding smallest,
@@ -68,9 +53,6 @@ def find_phaseVel(c_s, c_p):
     '''
     phaseVel = so.root_scalar(rayleigh_function, args=(c_s, c_p), method='newton', fprime=rayleigh_function_prime, x0=0.919*c_s, xtol=1e-25)
     return phaseVel.root
-
-
-# In[6]:
 
 
 def rayleigh_eigenfunction_x(z, omega, c_s, c_p):
@@ -93,9 +75,6 @@ def rayleigh_eigenfunction_x(z, omega, c_s, c_p):
     return r1
 
 
-# In[7]:
-
-
 def rayleigh_eigenfunction_z(z, omega, c_s, c_p):
     '''
     returns values of eigenfunction at each z for z-component displacement from 
@@ -113,9 +92,6 @@ def rayleigh_eigenfunction_z(z, omega, c_s, c_p):
     r2 = AA * alphaP * np.exp(-abs(k) * alphaP * z) - 2 * AA * (alphaP / (1 + alphaS**2)) * np.exp(-abs(k) * alphaS * z)
     
     return r2
-
-
-# In[8]:
 
 
 def rayleigh_eigenfunction_z_PRIME(z, omega, c_s, c_p):
@@ -137,9 +113,6 @@ def rayleigh_eigenfunction_z_PRIME(z, omega, c_s, c_p):
     return dr2_dz
 
 
-# In[9]:
-
-
 def rayleigh_energy_integral1(rho, omega, c_s, c_p):
     '''
     returns value of energy integral I1 for particular Rayleigh wave mode
@@ -158,9 +131,6 @@ def rayleigh_energy_integral1(rho, omega, c_s, c_p):
     I1 += BB * 2 * alphaP**2 / (abs(k) * alphaS * (1 + alphaS**2))
     
     return I1
-
-
-# In[10]:
 
 
 def rayleigh_energy_integral2(lame, mu, omega, c_s, c_p):
@@ -184,9 +154,6 @@ def rayleigh_energy_integral2(lame, mu, omega, c_s, c_p):
     return I2
 
 
-# In[11]:
-
-
 def rayleigh_energy_integral3(lame, mu, omega, c_s, c_p):
     '''
     returns value of energy integral I3 for particular Rayleigh wave mode
@@ -208,9 +175,6 @@ def rayleigh_energy_integral3(lame, mu, omega, c_s, c_p):
     return I3
 
 
-# In[12]:
-
-
 def rayleigh_group_velocity(rho, lame, mu, omega, c_s, c_p):
     '''
     returns Rayleigh group velocity for mode with frequency omega
@@ -225,9 +189,6 @@ def rayleigh_group_velocity(rho, lame, mu, omega, c_s, c_p):
     U = (I2 + (I3 / (2 * k))) / (c * I1)
     
     return U
-
-
-# In[13]:
 
 
 def rayleigh_displacement_hat_pointforce(omega_np, pos, force_hat, h, mediumParams):
@@ -279,9 +240,6 @@ def rayleigh_displacement_hat_pointforce(omega_np, pos, force_hat, h, mediumPara
     return displ_r_hat, displ_z_hat
 
 
-# In[14]:
-
-
 def rayleigh_displacement_force(force_z, pos, source_pos, dt, mediumParams):
     '''
     returns rayleigh displacement field (in time domain) for each receiver and source
@@ -329,9 +287,6 @@ def rayleigh_displacement_force(force_z, pos, source_pos, dt, mediumParams):
             displ_z[jj, ii] = np.fft.ifft(displ_z_hat)[:NN] / dt
             
     return displ_r, -displ_z
-
-
-# In[15]:
 
 
 def rayleigh_displacement_hat_moment(omega_np, pos, moment_hat, moment_tensor, h, mediumParams):
@@ -385,9 +340,6 @@ def rayleigh_displacement_hat_moment(omega_np, pos, moment_hat, moment_tensor, h
     displ_r_hat[0] = displ_z_hat[0] = 0
     
     return displ_r_hat, displ_z_hat
-
-
-# In[16]:
 
 
 def rayleigh_displacement_moment(moment, moment_tensor, pos, source_pos, dt, mediumParams):

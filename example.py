@@ -71,8 +71,6 @@ x, y, z = syn.synthetic(pressure, shear_force, dt, accel_pos, chamberParams, pis
 
 nn = 5
 
-get_ipython().run_line_magic('matplotlib', 'notebook')
-
 colors = ['#F0E442', '#E69F00', '#56B4E9', '#009E73', '#000000']
 line_styles = ['-', '--', ':', '-.', '.']
 

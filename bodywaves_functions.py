@@ -1,14 +1,8 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
-
-
 import numpy as np
 import gc
-
-
-# In[3]:
 
 
 def p_wave_ff_hat(M_hat, M_ij, omega, r, c, rho, gamma):
@@ -39,9 +33,6 @@ def p_wave_ff_hat(M_hat, M_ij, omega, r, c, rho, gamma):
     return p_hat_x, p_hat_y, p_hat_z
 
 
-# In[4]:
-
-
 def s_wave_ff_hat(M_hat, M_ij, omega, r, c, rho, gamma):
     '''
     returns the spectrum of the FAR-field s-wave given FT of source
@@ -67,9 +58,6 @@ def s_wave_ff_hat(M_hat, M_ij, omega, r, c, rho, gamma):
     s_hat_z = s_hat * pol[2]
     
     return s_hat_x, s_hat_y, s_hat_z
-
-
-# In[5]:
 
 
 def p_wave_if_hat(M_hat, M_ij, omega, r, c, rho, gamma):
@@ -101,9 +89,6 @@ def p_wave_if_hat(M_hat, M_ij, omega, r, c, rho, gamma):
     return p_hat_x, p_hat_y, p_hat_z
 
 
-# In[6]:
-
-
 def s_wave_if_hat(M_hat, M_ij, omega, r, c, rho, gamma):
     '''
     returns the spectrum of the INTERMEDIATE-field S-wave given FT of source
@@ -131,9 +116,6 @@ def s_wave_if_hat(M_hat, M_ij, omega, r, c, rho, gamma):
     s_hat_z = s_hat * pol[2]
     
     return s_hat_x, s_hat_y, s_hat_z
-
-
-# In[7]:
 
 
 def nearfield_hat(M_hat, M_ij, omega, r, c_p, c_s, rho, gamma):
@@ -176,10 +158,8 @@ def nearfield_hat(M_hat, M_ij, omega, r, c_p, c_s, rho, gamma):
     return nf_hat_x, nf_hat_y, nf_hat_z
 
 
-# In[8]:
-
-
-def displacement_moment(moment, moment_tensor, separation, gamma, dt, mediumParams,                        terms = 'all', ps_tuner = 'pON-sON'):
+def displacement_moment(moment, moment_tensor, separation, gamma, dt, mediumParams,
+                            terms = 'all', ps_tuner = 'pON-sON'):
     '''
     displacement with option to turn on/off p and s waves and different radiation terms
     defaults to: all radiation terms calculated, both p and s waves
@@ -319,9 +299,6 @@ def displacement_moment(moment, moment_tensor, separation, gamma, dt, mediumPara
     return displacement_x, displacement_y, displacement_z
 
 
-# In[1]:
-
-
 def p_singleforce_ff_hat(F_hat, omega, r, c, rho, gamma):
     '''
     returns spectrum of FAR-field P-wave given FT of SINGLE-FORCE source
@@ -346,9 +323,6 @@ def p_singleforce_ff_hat(F_hat, omega, r, c, rho, gamma):
     p_hat_z = p_hat * pol[2]
     
     return p_hat_x, p_hat_y, p_hat_z
-
-
-# In[2]:
 
 
 def s_singleforce_ff_hat(F_hat, omega, r, c, rho, gamma):
@@ -377,9 +351,6 @@ def s_singleforce_ff_hat(F_hat, omega, r, c, rho, gamma):
     s_hat_z = s_hat * pol[2]
     
     return s_hat_x, s_hat_y, s_hat_z
-
-
-# In[3]:
 
 
 def singleforce_nf_hat(F_hat, omega, r, c_p, c_s, rho, gamma):
@@ -421,10 +392,8 @@ def singleforce_nf_hat(F_hat, omega, r, c_p, c_s, rho, gamma):
     return nf_hat_x, nf_hat_y, nf_hat_z
 
 
-# In[4]:
-
-
-def displacement_force(force, separation, gamma, dt, mediumParams,                        terms = 'all', ps_tuner = 'pON-sON'):
+def displacement_force(force, separation, gamma, dt, mediumParams,
+                            terms = 'all', ps_tuner = 'pON-sON'):
     '''
     displacement with option to turn on/off p and s waves and different radiation terms
     defaults to: all radiation terms calculated, both p and s waves
@@ -528,10 +497,4 @@ def displacement_force(force, separation, gamma, dt, mediumParams,              
     gc.collect()
 
     return displacement_x, displacement_y, displacement_z
-
-
-# In[ ]:
-
-
-
 
