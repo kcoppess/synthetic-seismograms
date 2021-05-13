@@ -7,18 +7,74 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import gc
+import os
+from zipfile import ZipFile
+import scipy.signal as sg
+import scipy.interpolate as si
 
 import synthetic as syn
 import helpers as hp
+import source_setup as ss
+import bodywaves_functions as bw
 
 
 # In[ ]:
 
 
-'''loading data and parameters'''
-directory = '/Users/kcoppess/muspelheim/kilauea_collapse/'
-data = np.loadtxt(directory+'pressure_stress_history.txt', delimiter=',', skiprows=1).transpose()
-data1 = np.loadtxt(directory+'resonance_history.txt', delimiter=',', skiprows=1).transpose()
+'''loading data and setting up directories'''
+SIMULATION = 'RUPTURE__300s_128pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
+SOURCE_TYPE = 'CONDUIT'
+CONTRIBUTION = 'MOMENT'
+TOTAL_TIME = 300 #in seconds
+
+direc = '/Users/kcoppess/muspelheim/synthetic-seismograms/seismos/'+SIMULATION+'/'
+save_file = direc+SOURCE_TYPE+'__'+CONTRIBUTION+'__'
+directory = '/Users/kcoppess/muspelheim/simulation-results/plug_rupture/'+SIMULATION+'__'
+
+if not os.path.exists(direc):
+    os.makedirs(direc)
+
+zip_filename = directory+'.zip'
+
+directory = ZipFile(zip_filename, mode='r')
+
+if SOURCE_TYPE == 'CONDUIT':
+    p1 = np.loadtxt(io.BytesIO(directory.read('pressure.txt')), delimiter=',')
+    p1 = np.real(p1)
+elif SOURCE_TYPE == 'CHAMBER':
+    p1 = np.loadtxt(io.BytesIO(directory.read('chamber_pressure.txt')), delimiter=',')
+    p1 = np.real(p1)
+
+time1 = np.loadtxt(io.BytesIO(directory.read('time.txt')), delimiter=',')
+# in conduit flow code, this takes up to be positive z and
+# bottom of conduit is at z = 0
+height = np.loadtxt(io.BytesIO(directory.read('height.txt')), delimiter=',')
+
+directory.close()
+
+
+'''------------------------------------------------------------------------------------------'''
+
+'''signal processing to smooth out numerical effects (e.g. from downsampling)'''
+dt = time1[2] - time1[1]
+length = int(TOTAL_TIME/dt)
+time = np.arange(length)*dt
+
+time_smooth = si.interp1d(np.arange(len(time1))[::2], time1[::2], kind='cubic')
+times = time_smooth(np.arange(len(time1))[:-2])
+
+if SOURCE_TYPE == 'CONDUIT':
+    smooth = si.interp1d(times, p1[:,:-2], kind='cubic', axis=1)
+    p = smooth(time)
+elif SOURCE_TYPE == 'CHAMBER':
+    smooth = si.interp1d(times, p1[:-2], kind='cubic')
+    p = smooth(time)
+
+gc.collect()
+
+'''------------------------------------------------------------------------------------------'''
+'''------------------------------------------------------------------------------------------'''
+'''------------------------------------------------------------------------------------------'''
 
 time = np.array(data[0])
 pressure = np.array(data[1]) + np.array(data1[1])
