@@ -17,35 +17,6 @@ import surfacewaves_functions as sw
 # In[ ]:
 
 
-def translate(new_origin, pos, chamberCent, pistonCent):
-    '''
-    transforms the original position vectors with new origin
-    
-    ---INPUTS---
-    new_origin  : (3)             : position of new origin in old coordinates
-    pos         : (# stations, 3) : station positions in old coordinates
-    chamberCent : (3)             : chamber centroid in old coordinates
-    pistonCent  : (3)             : piston centroid in old coordinates
-    ---RETURNS---
-    new_pos     : (# stations, 3) : stations positions w.r.t. new origin
-    new_chamber : (3)             : chamber centroid w.r.t. new origin
-    new_piston  : (3)             : piston centroid w.r.t. new origin
-    '''
-    nn = pos.shape[0]
-    
-    new_pos = np.zeros((nn, 3))
-    for ii in range(nn):
-        new_pos[ii] = pos[ii] - new_origin
-        
-    new_chamber = chamberCent - new_origin
-    new_piston = pistonCent - new_origin
-    
-    return new_pos, new_chamber, new_piston
-
-
-# In[ ]:
-
-
 def cylindrical(original):
     '''
     transforms from Cartesian to cylindrical (r, phi, z)
@@ -192,10 +163,4 @@ def synthetic(pressure, shear_force, dt, stationPos, chamberParams, pistonParams
         return np.gradient(seismo_x[:,0,shift:], dt, axis=1), np.gradient(seismo_y[:,0,shift:], dt, axis=1), np.gradient(seismo_z[:,0,shift:], dt, axis=1)
     else:
         return seismo_x[:,0,shift:], seismo_y[:,0,shift:], seismo_z[:,0,shift:]
-
-
-# In[ ]:
-
-
-
 
