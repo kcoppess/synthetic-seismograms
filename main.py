@@ -23,6 +23,7 @@ SOURCE_TYPE = 'CONDUIT'
 CONTRIBUTION = 'MOMENT'
 TOTAL_TIME = 100 #in seconds
 SAVE = True
+PLOT = False
 
 conduit_radius = 30 #m
 chamber_vol = 1e5 #m^3
@@ -150,33 +151,33 @@ gc.collect()
 
 
 '''plotting combined waveform'''
-
-colors = ['#F0E442', '#E69F00', '#56B4E9', '#009E73', '#000000']
-line_styles = ['-', '--', ':', '-.', '.']
-
-fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex = True, sharey = False, figsize=(10,10))
-ax1, ax2, ax3 = hp.seismogram_plot_setup([ax1, ax2, ax3], 'single-source:')
-
-for ii in range(nn):
-    ax1.plot(time, rad[ii], color=colors[ii], linestyle=line_styles[0], label=labels[ii], linewidth=1.5)
-ax1.set_ylabel('radial ($r$)')
-ax1.set_xlim(0, np.max(time))
-ax1.legend()
-# ax1.set_ylim(-1.5e-10, 1e-10)
-#ax1.set_ylim(-0.00003, 0.00003)
-
-for ii in range(nn):
-    ax2.plot(time, tra[ii], color=colors[ii], linestyle=line_styles[0], linewidth=1.5)
-ax2.legend(loc=1, fontsize='small')
-ax2.set_ylabel('transverse ($\phi$)')
-
-for ii in range(nn):
-    ax3.plot(time, ver[ii], color=colors[ii], linestyle=line_styles[0], linewidth=1.5)
-ax3.set_xlabel('time (s)')
-ax3.set_ylabel('vertical ($\\theta$)')
-
-# plt.savefig(plot_file+'PS_far_'+str(int(rr / 1000))+'km.png', dpi = 300)
-
-plt.show()
+if PLOT:
+    colors = ['#F0E442', '#E69F00', '#56B4E9', '#009E73', '#000000']
+    line_styles = ['-', '--', ':', '-.', '.']
+    
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex = True, sharey = False, figsize=(10,10))
+    ax1, ax2, ax3 = hp.seismogram_plot_setup([ax1, ax2, ax3], 'single-source:')
+    
+    for ii in range(nn):
+        ax1.plot(time, rad[ii], color=colors[ii], linestyle=line_styles[0], label=labels[ii], linewidth=1.5)
+    ax1.set_ylabel('radial ($r$)')
+    ax1.set_xlim(0, np.max(time))
+    ax1.legend()
+    # ax1.set_ylim(-1.5e-10, 1e-10)
+    #ax1.set_ylim(-0.00003, 0.00003)
+    
+    for ii in range(nn):
+        ax2.plot(time, tra[ii], color=colors[ii], linestyle=line_styles[0], linewidth=1.5)
+    ax2.legend(loc=1, fontsize='small')
+    ax2.set_ylabel('transverse ($\phi$)')
+    
+    for ii in range(nn):
+        ax3.plot(time, ver[ii], color=colors[ii], linestyle=line_styles[0], linewidth=1.5)
+    ax3.set_xlabel('time (s)')
+    ax3.set_ylabel('vertical ($\\theta$)')
+    
+    # plt.savefig(plot_file+'PS_far_'+str(int(rr / 1000))+'km.png', dpi = 300)
+    
+    plt.show()
 
 
