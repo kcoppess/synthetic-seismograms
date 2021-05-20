@@ -97,7 +97,7 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
     p, time, height = PS.moment_ZIP_load(zip_filename, SOURCE_TYPE, TOTAL_TIME)
     dt = time[2] - time[1]
     x_mom, y_mom, z_mom, moment = PS.moment_synthetic(SOURCE_TYPE, p, height, dt, pos, [sourceDim, sourcePos], 
-                                            [mu, rho_rock], WAVE='BODY')
+                                            [mu, rho_rock], WAVE='BOTH')
     if SAVE:
         np.savetxt(save_file+'MOMENT__r'+str(int(rr))+'_x.gz', x_mom, delimiter=',')
         np.savetxt(save_file+'MOMENT__r'+str(int(rr))+'_y.gz', y_mom, delimiter=',')
@@ -106,8 +106,8 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
 elif CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
     f, time, height = PS.force_ZIP_load(zip_filename, SOURCE_TYPE, TOTAL_TIME)
     dt = time[2] - time[1]
-    x_for, y_for, z_for, force = PS.force_synthetic(SOURCE_TYPE, f, height, dt, pos, [sourceDim, sourcePos], 
-                                            [mu, rho_rock], WAVE='BODY')
+    x_for, y_for, z_for, force = PS.force_synthetic(SOURCE_TYPE, f, height, dt, pos, [A, sourcePos], 
+                                            [mu, rho_rock], WAVE='BOTH')
     if SAVE:
         np.savetxt(save_file+'FORCE__r'+str(int(rr))+'_x.gz', x_for, delimiter=',')
         np.savetxt(save_file+'FORCE__r'+str(int(rr))+'_y.gz', y_for, delimiter=',')
@@ -160,7 +160,7 @@ ax1, ax2, ax3 = hp.seismogram_plot_setup([ax1, ax2, ax3], 'single-source:')
 for ii in range(nn):
     ax1.plot(time, rad[ii], color=colors[ii], linestyle=line_styles[0], label=labels[ii], linewidth=1.5)
 ax1.set_ylabel('radial ($r$)')
-ax1.set_xlim(-18, np.max(time))
+ax1.set_xlim(0, np.max(time))
 ax1.legend()
 # ax1.set_ylim(-1.5e-10, 1e-10)
 #ax1.set_ylim(-0.00003, 0.00003)
