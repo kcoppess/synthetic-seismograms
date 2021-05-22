@@ -13,20 +13,19 @@ import scipy.signal as sg
 import scipy.interpolate as si
 
 import point_source as PS
-import synthetic as syn
 import helpers as hp
 import source_setup as ss
 
 
-SIMULATION = 'sharper__RUPTURE__100s_128pts__CHAM_10e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
-SOURCE_TYPE = 'CONDUIT'
+SIMULATION = '60__RUPTURE__200s_128pts__CHAM_10e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
+SOURCE_TYPE = 'CHAMBER'
 CONTRIBUTION = 'MOMENT'
-TOTAL_TIME = 100 #in seconds
+TOTAL_TIME = 200 #in seconds
 SAVE = True
 PLOT = False
 
 conduit_radius = 30 #m
-chamber_vol = 1e5 #m^3
+chamber_vol = 1e7 #m^3
 
 # source depth
 if SOURCE_TYPE == 'CONDUIT':
@@ -39,7 +38,7 @@ elif SOURCE_TYPE == 'CHAMBER':
 # number of seismometers
 nn = 1
 # all seismometers equal distant from origin (m)
-rr = 1e3
+rr = 3e3
 
 '''
 spatial coordinate labels
@@ -114,6 +113,7 @@ elif CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
         np.savetxt(save_file+'FORCE__r'+str(int(rr))+'_y.gz', y_for, delimiter=',')
         np.savetxt(save_file+'FORCE__r'+str(int(rr))+'_z.gz', z_for, delimiter=',')
         np.savetxt(save_file+'FORCE.gz', force, delimiter=',')
+np.savetxt(direc+'TIME.gz', time, delimiter=',')
 
 x = np.zeros((nn, len(time)), dtype='complex')
 y = np.zeros((nn, len(time)), dtype='complex')
@@ -149,6 +149,7 @@ for ii in range(nn):
 gc.collect()
 # In[ ]:
 
+print(SOURCE_TYPE+' '+CONTRIBUTION)
 
 '''plotting combined waveform'''
 if PLOT:
