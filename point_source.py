@@ -12,7 +12,6 @@ from zipfile import ZipFile
 import scipy.signal as sg
 import scipy.interpolate as si
 
-import synthetic as syn
 import helpers as hp
 import source_setup as ss
 import bodywaves_functions as bw
