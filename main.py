@@ -103,7 +103,7 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
         np.savetxt(save_file+'MOMENT__r'+str(int(rr))+'_y.gz', y_mom, delimiter=',')
         np.savetxt(save_file+'MOMENT__r'+str(int(rr))+'_z.gz', z_mom, delimiter=',')
         np.savetxt(save_file+'MOMENT.gz', moment, delimiter=',')
-elif CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
+if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
     f, time, height = PS.force_ZIP_load(zip_filename, SOURCE_TYPE, TOTAL_TIME)
     dt = time[2] - time[1]
     x_for, y_for, z_for, force = PS.force_synthetic(SOURCE_TYPE, f, height, dt, pos, [A, sourcePos], 
@@ -126,7 +126,7 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
     gc.collect()
     z += z_mom
     gc.collect()
-elif CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
+if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
     x += x_for
     gc.collect()
     y += y_for

@@ -242,7 +242,7 @@ def moment_synthetic(SOURCE_TYPE, pressure, height, dt, stationPos, sourceParams
         gc.collect()
         seismo_z += body_z
         gc.collect()
-    elif WAVE == 'SURF' or WAVE == 'BOTH':
+    if WAVE == 'SURF' or WAVE == 'BOTH':
         surf_r, surf_z = sw.rayleigh_displacement_moment(moment, moment_tensor, stationPos_cyl,
                                                    np.array([-sourcePos[2]]), dt, [rho_rock, lame, mu])
         seismo_z += surf_z
@@ -341,7 +341,7 @@ def force_synthetic(SOURCE_TYPE, force, height, dt, stationPos, sourceParams, me
         gc.collect()
         seismo_z += body_z
         gc.collect()
-    elif WAVE == 'SURF' or WAVE == 'BOTH':
+    if WAVE == 'SURF' or WAVE == 'BOTH':
         surf_r, surf_z = sw.rayleigh_displacement_force(-force, stationPos_cyl, np.array([-sourcePos[2]]), dt, [rho_rock, lame, mu])
         seismo_z += surf_z
         gc.collect()
