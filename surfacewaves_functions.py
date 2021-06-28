@@ -270,8 +270,8 @@ def rayleigh_displacement_force(force_z, pos, source_pos, dt, mediumParams):
     
     omega = np.fft.fftfreq(2*NN, dt) * (2 * np.pi)
     
-    displ_r = np.zeros((nn, HH, NN))
-    displ_z = np.zeros((nn, HH, NN))
+    displ_r = np.zeros((nn, HH, NN), dtype='complex')
+    displ_z = np.zeros((nn, HH, NN), dtype='complex')
     
     for ii in range(HH):
 #         reflect = np.concatenate((force_z[ii], np.flip(force_z[ii])))
@@ -370,8 +370,8 @@ def rayleigh_displacement_moment(moment, moment_tensor, pos, source_pos, dt, med
     ttt_in = np.concatenate((ttt[:NN], ttt[NN+padding:]))
     omega = np.fft.fftfreq(2*NN + padding, dt) * (2 * np.pi)
     
-    displ_r = np.zeros((nn, HH, NN))
-    displ_z = np.zeros((nn, HH, NN))
+    displ_r = np.zeros((nn, HH, NN), dtype='complex')
+    displ_z = np.zeros((nn, HH, NN), dtype='complex')
     
     for ii in range(HH):
         gc.collect()
