@@ -17,15 +17,15 @@ import helpers as hp
 import source_setup as ss
 
 
-SIMULATION = '60__RUPTURE__200s_128pts__CHAM_10e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
+SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
 SOURCE_TYPE = 'CHAMBER'
 CONTRIBUTION = 'MOMENT'
-TOTAL_TIME = 200 #in seconds
-SAVE = False
+TOTAL_TIME = 2998 #in seconds
+SAVE = True
 PLOT = True
 
 conduit_radius = 30 #m
-chamber_vol = 1e7 #m^3
+chamber_vol = 1e5 #m^3
 
 # source depth
 if SOURCE_TYPE == 'CONDUIT':
@@ -90,7 +90,7 @@ save_file = direc+SOURCE_TYPE+'__'
 if not os.path.exists(direc):
     os.makedirs(direc)
 
-directory = '/Users/kcoppess/muspelheim/simulation-results/plug_rupture/'+SIMULATION+'__'
+directory = '/Users/kcoppess/muspelheim/simulation-results/high-res/'+SIMULATION
 zip_filename = directory+'.zip'
 
 if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
@@ -151,6 +151,9 @@ gc.collect()
 
 print(SOURCE_TYPE+' '+CONTRIBUTION)
 
+plt.plot(time, moment)
+plt.show()
+
 '''plotting combined waveform'''
 if PLOT:
     colors = ['#F0E442', '#E69F00', '#56B4E9', '#009E73', '#000000']
@@ -162,7 +165,7 @@ if PLOT:
     for ii in range(nn):
         ax1.plot(time, rad[ii], color=colors[ii], linestyle=line_styles[0], label=labels[ii], linewidth=1.5)
     ax1.set_ylabel('radial ($r$)')
-    ax1.set_xlim(0, np.max(time))
+    # ax1.set_xlim(-10, np.max(time))
     ax1.legend()
     # ax1.set_ylim(-1.5e-10, 1e-10)
     #ax1.set_ylim(-0.00003, 0.00003)
