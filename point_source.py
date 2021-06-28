@@ -35,6 +35,11 @@ def cylindrical(original):
     for ii in range(nn):
         if original[ii][0] < 0:
             phi = np.arctan(original[ii][1] / original[ii][0]) + np.pi
+        elif original[ii][0] == 0:
+            if original[ii][1] > 0:
+                phi = np.pi / 2
+            else:
+                phi = 3 * np.pi / 2
         else:
             phi = np.arctan(original[ii][1] / original[ii][0])
         new[ii] = np.array([np.linalg.norm(original[ii][:2]), phi, -original[ii][2]])
