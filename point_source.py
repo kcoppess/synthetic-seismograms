@@ -165,7 +165,7 @@ def force_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME):
 
 
 def moment_synthetic(SOURCE_TYPE, pressure, height, dt, stationPos, sourceParams, mediumParams, 
-                        WAVE='BOTH', deriv='DIS'):
+                        WAVE='BOTH', deriv='DIS', SOURCE_FILTER=False):
     '''
     calculates the point source synthetic seismograms from moment contributions at given station positions
     
@@ -196,6 +196,7 @@ def moment_synthetic(SOURCE_TYPE, pressure, height, dt, stationPos, sourceParams
                                                  (options: 'ACC' acceleration; 
                                                            'VEL' velocity; 
                                                            'DIS' displacement)
+    SOURCE_FILTER : bool                       : if True, filters source function before synth-seis calc
     ---RETURNS---
     seismo_x, seismo_y, seismo_z : (# stations, # time points) : chosen deriv applied to synthetic seismograms
     '''
@@ -225,12 +226,18 @@ def moment_synthetic(SOURCE_TYPE, pressure, height, dt, stationPos, sourceParams
 
     if SOURCE_TYPE == 'CONDUIT':
         dmoment_dz = ss.moment_density(pressure, sourceDim, cushion=shift)
-        filt = sg.lfilter(b, a, dmoment_dz)
+        if SOURCE_FILTER:
+            filt = sg.lfilter(b, a, dmoment_dz)
+        else:
+            filt = dmoment_dz
         moment = hp.integration_trapezoid(height, np.array([filt]))
         moment_tensor = ss.moment_tensor_cylindricalSource([lame, mu])
     elif SOURCE_TYPE == 'CHAMBER':
         moment_unfil = ss.moment_density(np.array([pressure]), sourceDim, cushion=shift)[0] 
-        moment = [sg.lfilter(b, a, moment_unfil)]
+        if SOURCE_FILTER:
+            moment = [sg.lfilter(b, a, moment_unfil)]
+        else:
+            moment = [moment_unfil]
         moment_tensor = ((lame + 2*mu) / mu) * np.eye(3)
     gc.collect()
     
@@ -268,7 +275,7 @@ def moment_synthetic(SOURCE_TYPE, pressure, height, dt, stationPos, sourceParams
 
 
 def force_synthetic(SOURCE_TYPE, force, height, dt, stationPos, sourceParams, mediumParams, 
-                        WAVE='BOTH', deriv='DIS'):
+                        WAVE='BOTH', deriv='DIS', SOURCE_FILTER=False):
     '''
     calculates the point source synthetic seismograms from force contributions at given station positions
     
@@ -298,6 +305,7 @@ def force_synthetic(SOURCE_TYPE, force, height, dt, stationPos, sourceParams, me
                                                  (options: 'ACC' acceleration; 
                                                            'VEL' velocity; 
                                                            'DIS' displacement)
+    SOURCE_FILTER : bool                       : if True, filters source function before synth-seis calc
     ---RETURNS---
     seismo_x, seismo_y, seismo_z : (# stations, # time points) : chosen deriv applied to synthetic seismograms
     '''
@@ -327,11 +335,17 @@ def force_synthetic(SOURCE_TYPE, force, height, dt, stationPos, sourceParams, me
 
     if SOURCE_TYPE == 'CONDUIT':
         dforce_dz = ss.moment_density(force, sourceDim, cushion=shift)
-        filt = sg.lfilter(b, a, dforce_dz)
+        if SOURCE_FILTER:
+            filt = sg.lfilter(b, a, dforce_dz)
+        else:
+            filt = dforce_dz
         force = hp.integration_trapezoid(height, np.array([filt]))
     elif SOURCE_TYPE == 'CHAMBER':
         force_unfil = ss.moment_density(np.array([force]), sourceDim, cushion=shift)[0] 
-        force = np.array([sg.lfilter(b, a, force_unfil)])
+        if SOURCE_FILTER:
+            force = np.array([sg.lfilter(b, a, force_unfil)])
+        else:
+            force = np.array([force_unfil])
     gc.collect()
     
     seismo_x = np.zeros((1, np.ma.size(stationPos, axis=0), np.ma.size(force, axis=1)), dtype='complex')
