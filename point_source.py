@@ -52,8 +52,8 @@ def cartesian(radial, pos_cyl):
     '''
     nn = radial.shape[0]
     
-    x = np.zeros(radial.shape)
-    y = np.zeros(radial.shape)
+    x = np.zeros(radial.shape, dtype='complex')
+    y = np.zeros(radial.shape, dtype='complex')
     for ii in range(nn):
         x[ii] = radial[ii] * np.cos(pos_cyl[ii,1])
         y[ii] = radial[ii] * np.sin(pos_cyl[ii,1])

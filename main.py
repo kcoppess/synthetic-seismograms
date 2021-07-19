@@ -17,11 +17,11 @@ import helpers as hp
 import source_setup as ss
 
 
-#SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
-SIMULATION = '1500__RUPTURE__200s_79pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0747m__MAGMA_cVF80_n001__'
-SOURCE_TYPE = 'CONDUIT'
+SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
+#SIMULATION = '1500__RUPTURE__200s_89pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0753m__MAGMA_cVF80_n001__'
+SOURCE_TYPE = 'CHAMBER'
 CONTRIBUTION = 'BOTH'
-TOTAL_TIME = 200 #in seconds
+TOTAL_TIME = 2998 #in seconds
 SAVE = False
 PLOT = True
 
@@ -91,8 +91,8 @@ save_file = direc+SOURCE_TYPE+'__'
 if not os.path.exists(direc):
     os.makedirs(direc)
 
-#directory = '/Users/kcoppess/muspelheim/simulation-results/high-res/'+SIMULATION
-directory = '/Users/kcoppess/muspelheim/simulation-results/plug_rupture/'+SIMULATION
+directory = '/Users/kcoppess/muspelheim/simulation-results/high-res/'+SIMULATION
+#directory = '/Users/kcoppess/muspelheim/simulation-results/plug_rupture/'+SIMULATION
 zip_filename = directory+'.zip'
 
 if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
