@@ -15,24 +15,38 @@ import scipy.interpolate as si
 import point_source as PS
 import helpers as hp
 import source_setup as ss
+import source_plot as sp
 
-
-SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
-#SIMULATION = '1500__RUPTURE__200s_89pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0753m__MAGMA_cVF80_n001__'
-SOURCE_TYPE = 'CHAMBER'
-CONTRIBUTION = 'BOTH'
-TOTAL_TIME = 2998 #in seconds
+'''Input Section'''
+SIMULATION = '60__RUPTURE__200s_128pts__CHAM_10e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
+SOURCE_TYPE = 'CHAMBER'  # CHAMBER or CONDUIT
+print(SOURCE_TYPE)
+CONTRIBUTION = 'MOMENT'  # MOMENT, FORCE, or BOTH
+TOTAL_TIME = 200  # in seconds
 SAVE = False
 PLOT = True
+print(CONTRIBUTION)
+WAVE_TYPE = 'BOTH'  # SURF, BODY, or BOTH
+print(WAVE_TYPE)
+DERIV = 'DIS'  # ACC, VEL, or DIS
+print(DERIV)
+TERMS = 'all'  # all, near, intermediate, far, near+intermediate
+print(TERMS)
+PS_TUNER = 'pON-sON'  # pON-sON, pON-sOFF, pOFF-sON
+print(PS_TUNER)
+TIME_INPUT = 'MANUAL'  # MANUAL or anything else (anything other than MANUAL draws data from the file directory)
+MOMENT_PRESSURE = [0, 1, 2]  # moment pressure time series for manual entry
+FORCE_PRESSURE = [0, 1, 2]  # force pressure time series for manual entry
+MANUAL_TIME = [0, 1, 2]  # time for time series for manual entry
 
-conduit_radius = 30 #m
-chamber_vol = 1e5 #m^3
+conduit_radius = 30  # m
+chamber_vol = 1e7  # m^3
 
 # source depth
 if SOURCE_TYPE == 'CONDUIT':
-    point = 500 #m
+    point = 500  # m
 elif SOURCE_TYPE == 'CHAMBER':
-    point = 1030 #m
+    point = 1030  # m
 
 '''------------------------------------------------------------------------------------------'''
 '''receiver/seismometer specs'''
@@ -59,11 +73,11 @@ pos = pos_unit * rr
 
 '''medium parameters set'''
 # density
-rho_rock = 2700 # kg/m^3
+rho_rock = 2700  # kg/m^3
 # shear modulus (when mu = 0, just have p-waves and matches acoustic)
-mu = 5e9 # Pa
+mu = 5e9  # Pa
 # bulk modulus
-K = 5 * mu / 3 # for a poisson ratio = 1/4
+K = 5 * mu / 3  # for a poisson ratio = 1/4
 # Lame parameter
 lame = K - (2/3)*mu
 
@@ -74,7 +88,7 @@ A = np.pi * conduit_radius**2
 
 '''for chamber'''
 # scaled volume of magma chamber (assuming spherical)
-vol = (3/4) * chamber_vol #np.pi * chamber_radius**3
+vol = (3/4) * chamber_vol  # =np.pi * chamber_radius**3
 
 if SOURCE_TYPE == 'CONDUIT':
     sourceDim = A
@@ -86,20 +100,26 @@ sourcePos = np.array([0,0,-point])
 '''------------------------------------------------------------------------------------------'''
 '''loading data and setting up directories'''
 
-direc = '/Users/kcoppess/muspelheim/synthetic-seismograms/seismos/'+SIMULATION+'/'
+direc = '/Users/conne/Documents/Python Scripts/kcoppess-synthetic-seismograms/'+SIMULATION+'__/'
 save_file = direc+SOURCE_TYPE+'__'
 if not os.path.exists(direc):
     os.makedirs(direc)
 
-directory = '/Users/kcoppess/muspelheim/simulation-results/high-res/'+SIMULATION
-#directory = '/Users/kcoppess/muspelheim/simulation-results/plug_rupture/'+SIMULATION
+directory = '/Users/conne/Documents/Python Scripts/kcoppess-synthetic-seismograms/'+SIMULATION+'__'
 zip_filename = directory+'.zip'
 
 if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
     p, time, height = PS.moment_ZIP_load(zip_filename, SOURCE_TYPE, TOTAL_TIME)
+    if TIME_INPUT == 'MANUAL':  # option to manually set moment time series
+        p = MOMENT_PRESSURE
+        time = MANUAL_TIME
     dt = time[2] - time[1]
-    x_mom, y_mom, z_mom, moment = PS.moment_synthetic(SOURCE_TYPE, p, height, dt, pos, [sourceDim, sourcePos], 
-                                            [mu, rho_rock], WAVE='BOTH')
+    x_mom, y_mom, z_mom, moment = PS.moment_synthetic(SOURCE_TYPE, p, height, dt, pos, [sourceDim, sourcePos],
+                                            [mu, rho_rock], TERMS, PS_TUNER, WAVE=WAVE_TYPE, deriv=DERIV)
+    if SOURCE_TYPE == 'CONDUIT' and TIME_INPUT != 'MANUAL':
+        sp.plot_pressure(time, p[1])
+    else:
+        sp.plot_pressure(time, p)
     if SAVE:
         np.savetxt(save_file+'MOMENT__r'+str(int(rr))+'_x.gz', x_mom, delimiter=',')
         np.savetxt(save_file+'MOMENT__r'+str(int(rr))+'_y.gz', y_mom, delimiter=',')
@@ -107,9 +127,13 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
         np.savetxt(save_file+'MOMENT.gz', moment, delimiter=',')
 if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
     f, time, height = PS.force_ZIP_load(zip_filename, SOURCE_TYPE, TOTAL_TIME)
+    if TIME_INPUT == 'MANUAL':  # option to manually set force time series
+        f = FORCE_PRESSURE
+        time = MANUAL_TIME
     dt = time[2] - time[1]
-    x_for, y_for, z_for, force = PS.force_synthetic(SOURCE_TYPE, f, height, dt, pos, [A, sourcePos], 
-                                            [mu, rho_rock], WAVE='BOTH')
+    x_for, y_for, z_for, force = PS.force_synthetic(SOURCE_TYPE, f, height, dt, pos, [A, sourcePos],
+                                            [mu, rho_rock], TERMS, PS_TUNER, WAVE=WAVE_TYPE, deriv=DERIV)
+    sp.plot_force(time, f)
     if SAVE:
         np.savetxt(save_file+'FORCE__r'+str(int(rr))+'_x.gz', x_for, delimiter=',')
         np.savetxt(save_file+'FORCE__r'+str(int(rr))+'_y.gz', y_for, delimiter=',')
@@ -157,30 +181,30 @@ print(SOURCE_TYPE+' '+CONTRIBUTION)
 if PLOT:
     colors = ['#F0E442', '#E69F00', '#56B4E9', '#009E73', '#000000']
     line_styles = ['-', '--', ':', '-.', '.']
-    
+
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex = True, sharey = False, figsize=(10,10))
     ax1, ax2, ax3 = hp.seismogram_plot_setup([ax1, ax2, ax3], 'single-source:')
-    
+
     for ii in range(nn):
         ax1.plot(time, rad[ii], color=colors[ii], linestyle=line_styles[0], label=labels[ii], linewidth=1.5)
     ax1.set_ylabel('radial ($r$)')
-    # ax1.set_xlim(-10, np.max(time))
+    ax1.set_xlim(0, np.max(time))
     ax1.legend()
     # ax1.set_ylim(-1.5e-10, 1e-10)
     #ax1.set_ylim(-0.00003, 0.00003)
-    
+
     for ii in range(nn):
         ax2.plot(time, tra[ii], color=colors[ii], linestyle=line_styles[0], linewidth=1.5)
     ax2.legend(loc=1, fontsize='small')
     ax2.set_ylabel('transverse ($\phi$)')
-    
+
     for ii in range(nn):
         ax3.plot(time, ver[ii], color=colors[ii], linestyle=line_styles[0], linewidth=1.5)
     ax3.set_xlabel('time (s)')
     ax3.set_ylabel('vertical ($\\theta$)')
-    
+
     # plt.savefig(plot_file+'PS_far_'+str(int(rr / 1000))+'km.png', dpi = 300)
-    
+
     plt.show()
 
 
