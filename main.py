@@ -34,7 +34,7 @@ TERMS = 'all'  # all, near, intermediate, far, near+intermediate
 print(TERMS)
 PS_TUNER = 'pON-sON'  # pON-sON, pON-sOFF, pOFF-sON
 print(PS_TUNER)
-TIME_INPUT = 'MANUAL'  # MANUAL or anything else (anything other than MANUAL draws data from the file directory)
+TIME_INPUT = ''  # MANUAL or anything else (anything other than MANUAL draws data from the file directory)
 MOMENT_PRESSURE = [0, 1, 2]  # moment pressure time series for manual entry
 FORCE_PRESSURE = [0, 1, 2]  # force pressure time series for manual entry
 MANUAL_TIME = [0, 1, 2]  # time for time series for manual entry
@@ -72,14 +72,21 @@ pos = pos_unit * rr
 '''------------------------------------------------------------------------------------------'''
 
 '''medium parameters set'''
+v_s = 2000 # m/s
+v_p = 4000 # m/s
 # density
 rho_rock = 2700  # kg/m^3
 # shear modulus (when mu = 0, just have p-waves and matches acoustic)
-mu = 5e9  # Pa
-# bulk modulus
-K = 5 * mu / 3  # for a poisson ratio = 1/4
+mu = rho * v_s**2  # Pa
+# p-wave modulus
+Kp = rho * v_p**2  # Pa
 # Lame parameter
-lame = K - (2/3)*mu
+lame = Kp - 2 * mu
+
+## bulk modulus
+#K = 5 * mu / 3  # for a poisson ratio = 1/4 
+## Lame parameter
+#lame = K - (2/3)*mu
 
 '''source description'''
 '''conduit'''
