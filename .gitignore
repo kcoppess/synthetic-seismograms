@@ -3,6 +3,11 @@
 # Learn more about .gitignore:
 #     https://www.atlassian.com/git/tutorials/saving-changes/gitignore
 
+# random files
+kate_local_example.py
+static_offset_Zhu.txt
+station_dist.py
+
 # Node artifact files
 node_modules/
 dist/
@@ -48,4 +53,3 @@ Thumbs.db
 *.mov
 *.wmv
 *.swp
-
