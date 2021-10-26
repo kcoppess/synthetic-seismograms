@@ -124,10 +124,6 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
     dt = time[2] - time[1]
     x_mom, y_mom, z_mom, moment = PS.moment_synthetic(SOURCE_TYPE, p, height, dt, pos, [sourceDim, sourcePos],
                                             [mu, rho_rock], TERMS, PS_TUNER, WAVE=WAVE_TYPE, deriv=DERIV)
-    if SOURCE_TYPE == 'CONDUIT' and TIME_INPUT != 'MANUAL':
-        sp.plot_pressure(time, p[1])
-    else:
-        sp.plot_pressure(time, p)
     if SAVE:
         np.savetxt(save_file+'MOMENT__r'+str(int(rr))+'_x.gz', x_mom, delimiter=',')
         np.savetxt(save_file+'MOMENT__r'+str(int(rr))+'_y.gz', y_mom, delimiter=',')
@@ -141,13 +137,13 @@ if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
     dt = time[2] - time[1]
     x_for, y_for, z_for, force = PS.force_synthetic(SOURCE_TYPE, f, height, dt, pos, [A, sourcePos],
                                             [mu, rho_rock], TERMS, PS_TUNER, WAVE=WAVE_TYPE, deriv=DERIV)
-    sp.plot_force(time, f)
     if SAVE:
         np.savetxt(save_file+'FORCE__r'+str(int(rr))+'_x.gz', x_for, delimiter=',')
         np.savetxt(save_file+'FORCE__r'+str(int(rr))+'_y.gz', y_for, delimiter=',')
         np.savetxt(save_file+'FORCE__r'+str(int(rr))+'_z.gz', z_for, delimiter=',')
         np.savetxt(save_file+'FORCE.gz', force, delimiter=',')
-np.savetxt(direc+'TIME.gz', time, delimiter=',')
+if SAVE:
+    np.savetxt(direc+'TIME.gz', time, delimiter=',')
 
 x = np.zeros((nn, len(time)), dtype='complex')
 y = np.zeros((nn, len(time)), dtype='complex')
