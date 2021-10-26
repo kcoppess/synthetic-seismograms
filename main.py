@@ -107,12 +107,13 @@ sourcePos = np.array([0,0,-point])
 '''------------------------------------------------------------------------------------------'''
 '''loading data and setting up directories'''
 
-direc = '/Users/conne/Documents/Python Scripts/kcoppess-synthetic-seismograms/'+SIMULATION+'__/'
+direc = '/Users/kcoppess/muspelheim/synthetic-seismograms/seismos/'+SIMULATION+'/'
 save_file = direc+SOURCE_TYPE+'__'
 if not os.path.exists(direc):
     os.makedirs(direc)
 
-directory = '/Users/conne/Documents/Python Scripts/kcoppess-synthetic-seismograms/'+SIMULATION+'__'
+directory = '/Users/kcoppess/muspelheim/simulation-results/high-res/'+SIMULATION
+#directory = '/Users/kcoppess/muspelheim/simulation-results/plug_rupture/'+SIMULATION
 zip_filename = directory+'.zip'
 
 if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
