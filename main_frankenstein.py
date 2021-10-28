@@ -123,10 +123,8 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
         p = MOMENT_PRESSURE
         time = MANUAL_TIME
     dt = time[2] - time[1]
-    r_mom, z_mom, tr_mom, moment = PS.moment_general(SOURCE_TYPE, p, height, time, dt, pos, [sourceDim, sourcePos],
-                                            [mu, lame, rho_rock], TERMS, PS_TUNER, WAVE=WAVE_TYPE, deriv=DERIV)
-    #x_mom, y_mom, z_mom, moment = PS.moment_synthetic(SOURCE_TYPE, p, height, dt, pos, [sourceDim, sourcePos],
-    #                                        [mu, rho_rock], TERMS, PS_TUNER, WAVE=WAVE_TYPE, deriv=DERIV)
+    x_mom, y_mom, z_mom, moment = PS.moment_synthetic(SOURCE_TYPE, p, height, dt, pos, [sourceDim, sourcePos],
+                                            [mu, rho_rock], TERMS, PS_TUNER, WAVE=WAVE_TYPE, deriv=DERIV)
     if SAVE:
         np.savetxt(save_file+'MOMENT__r'+str(int(rr))+'_x.gz', x_mom, delimiter=',')
         np.savetxt(save_file+'MOMENT__r'+str(int(rr))+'_y.gz', y_mom, delimiter=',')
