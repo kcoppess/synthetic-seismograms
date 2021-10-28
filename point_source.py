@@ -11,6 +11,7 @@ import io
 from zipfile import ZipFile
 import scipy.signal as sg
 import scipy.interpolate as si
+import scipy.integrate as sint
 
 import helpers as hp
 import source_setup as ss
@@ -63,9 +64,8 @@ def cartesian(radial, pos_cyl):
 
 
 def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, sourceParams, mediumParams, 
-                    mt_gf_file, sf_gf_file, deriv='DIS', coord = 'CYLINDRICAL', 
-                    SOURCE_FILTER=False, INTERPOLATE=False, SAVES=False, 
-                    mt_savefile='greens_functions/', sf_savefile='greens_functions/'):
+                    mt_gf_file, deriv='DIS', coord = 'CYLINDRICAL', SOURCE_FILTER=False, INTERPOLATE=False, 
+                    SAVES=False, mt_savefile='greens_functions/'):
     """
     calculates the point source synthetic seismograms from moment contributions at given station positions
     using loaded Green's functions
@@ -91,7 +91,6 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
                                                     source position vector]
     mediumParams  : [3]                        : [shear modulus (Pa), lame (Pa), rock density (kg/m^3)]
     mt_gf_file    : string                     : path to directory where MT GF are stored
-    sf_gf_file    : string                     : path to directory where SF GF are stored
     deriv         : string                     : seismogram time derivative to return
                                                  (options: 'ACC' acceleration;
                                                            'VEL' velocity;
@@ -102,7 +101,6 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
     INTERPOLATE   : bool                       : if True, will interpolate loaded GF
     SAVES         : bool                       : if True, will save final GF in savefile directory
     mt_savefile   : string                     : path to directory where final MT GF are saved
-    sf_savefile   : string                     : path to directory where final SF GF are saved
     ---RETURNS---
     seismo_x, seismo_y, seismo_z : (# stations, # time points) : chosen deriv applied to synthetic seismograms
     """
@@ -121,9 +119,9 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
     #separation, gamma = hp.separation_distances_vectors(stationPos, [sourcePos])
     #gc.collect()
 
-    # phase shift so as to eliminate some edge effects in from fourier transformation
-    # number of time steps
-    shift = 0
+    ## phase shift so as to eliminate some edge effects in from fourier transformation
+    ## number of time steps
+    #shift = 0
 
     # setting up low-pass filter to eliminate high frequency numerical effects
     nyq_freq = 0.5 / dt  # in Hz
@@ -151,16 +149,49 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
     moment_rate = np.gradient(moment, dt, axis=-1)
     gc.collect()
 
-    NN = np.ma.size(moment, axis=1)  # number of time points
-    RR = np.ma.size(stationPos, axis=0)  # number of receivers
+    TT = np.ma.size(moment, axis=1)  # number of time points
+    NN = np.ma.size(stationPos, axis=0)  # number of receivers
 
     mom_rate_hat = np.fft.fft(moment_rate, axis=1) * dt
 
-    vel_seismo_x = np.zeros((1, RR, NN), dtype='complex')
-    vel_seismo_y = np.zeros((1, RR, NN), dtype='complex')
-    vel_seismo_z = np.zeros((1, RR, NN), dtype='complex')
+    vel_z = np.zeros((1, NN, TT), dtype='complex')
+    vel_r = np.zeros((1, NN, TT), dtype='complex')
+    vel_tr = np.zeros((1, NN, TT), dtype='complex')
 
-    
+    for stat, ii in zip(stations, np.arange(NN)):
+        gf_time, gfs = gf.load_gfs(mt_gf_file+stat+'/', 0, time, INTERPOLATE_TIME=INTERPOLATE, SAVE=SAVES, save_file=mt_savefile, PLOT=False)
+        gfs_hat = []
+        for gg in gfs:
+            gf_hat = np.fft.fft(gg, axis=0) * dt
+            gfs_hat.append(gf_hat)
+        vel_z[0, ii] += np.fft.ifft(general_MT_hat[0,0] * gfs_hat[0][:,0], axis=-1) / dt
+        vel_z[0, ii] += np.fft.ifft(general_MT_hat[0,1] * gfs_hat[1][:,0], axis=-1) / dt
+        vel_z[0, ii] += np.fft.ifft(general_MT_hat[0,2] * gfs_hat[2][:,0], axis=-1) / dt
+        vel_z[0, ii] += np.fft.ifft(general_MT_hat[1,1] * gfs_hat[3][:,0], axis=-1) / dt
+        vel_z[0, ii] += np.fft.ifft(general_MT_hat[1,2] * gfs_hat[4][:,0], axis=-1) / dt
+        vel_z[0, ii] += np.fft.ifft(general_MT_hat[2,2] * gfs_hat[5][:,0], axis=-1) / dt
+        gc.collect()
+
+        vel_r[0, ii] += np.fft.ifft(general_MT_hat[0,0] * gfs_hat[0][:,1], axis=-1) / dt
+        vel_r[0, ii] += np.fft.ifft(general_MT_hat[0,1] * gfs_hat[1][:,1], axis=-1) / dt
+        vel_r[0, ii] += np.fft.ifft(general_MT_hat[0,2] * gfs_hat[2][:,1], axis=-1) / dt
+        vel_r[0, ii] += np.fft.ifft(general_MT_hat[1,1] * gfs_hat[3][:,1], axis=-1) / dt
+        vel_r[0, ii] += np.fft.ifft(general_MT_hat[1,2] * gfs_hat[4][:,1], axis=-1) / dt
+        vel_r[0, ii] += np.fft.ifft(general_MT_hat[2,2] * gfs_hat[5][:,1], axis=-1) / dt
+        gc.collect()
+
+        vel_tr[0, ii] += np.fft.ifft(general_MT_hat[0,0] * gfs_hat[0][:,2], axis=-1) / dt
+        vel_tr[0, ii] += np.fft.ifft(general_MT_hat[0,1] * gfs_hat[1][:,2], axis=-1) / dt
+        vel_tr[0, ii] += np.fft.ifft(general_MT_hat[0,2] * gfs_hat[2][:,2], axis=-1) / dt
+        vel_tr[0, ii] += np.fft.ifft(general_MT_hat[1,1] * gfs_hat[3][:,2], axis=-1) / dt
+        vel_tr[0, ii] += np.fft.ifft(general_MT_hat[1,2] * gfs_hat[4][:,2], axis=-1) / dt
+        vel_tr[0, ii] += np.fft.ifft(general_MT_hat[2,2] * gfs_hat[5][:,2], axis=-1) / dt
+
+    vel_z = np.real(vel_z)
+    vel_r = np.real(vel_r)
+    vel_tr = np.real(vel_tr)
+
+
 
 
 
