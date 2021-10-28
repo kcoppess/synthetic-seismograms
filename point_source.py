@@ -54,12 +54,14 @@ def cartesian(radial, pos_cyl):
     convert radial displacement into cartesian x, y
     """
     nn = radial.shape[0]
+    hh = radial.shape[1]
 
     x = np.zeros(radial.shape, dtype='complex')
     y = np.zeros(radial.shape, dtype='complex')
     for ii in range(nn):
-        x[ii] = radial[ii] * np.cos(pos_cyl[ii, 1])
-        y[ii] = radial[ii] * np.sin(pos_cyl[ii, 1])
+        for jj in range(hh):
+            x[ii, jj] = radial[ii, jj] * np.cos(pos_cyl[jj, 1])
+            y[ii, jj] = radial[ii, jj] * np.sin(pos_cyl[jj, 1])
     return x, y
 
 
@@ -194,40 +196,19 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
 
 
 
-
-    if WAVE == 'BODY' or WAVE == 'BOTH':
-        body_x, body_y, body_z = bw.displacement_moment(moment, moment_tensor, separation,
-                                                        gamma, dt, [rho_rock, lame, mu], terms=wave_terms,
-                                                        ps_tuner=ps_waves)
-        seismo_x += body_x
-        gc.collect()
-        seismo_y += body_y
-        gc.collect()
-        seismo_z += body_z
-        gc.collect()
-    if WAVE == 'SURF' or WAVE == 'BOTH':
-        surf_r, surf_z = sw.rayleigh_displacement_moment(moment, moment_tensor, stationPos_cyl,
-                                                         np.array([-sourcePos[2]]), dt, [rho_rock, lame, mu])
-        seismo_z += surf_z
-        gc.collect()
-        surf_x, surf_y = cartesian(surf_r, stationPos_cyl)
-        gc.collect()
-        seismo_x += surf_x
-        gc.collect()
-        seismo_y += surf_y
-        gc.collect()
-
-    if deriv == 'ACC':
-        return np.gradient(np.gradient(seismo_x[:, 0, shift:], dt, axis=1), dt, axis=1), np.gradient(
-            np.gradient(seismo_y[:, 0, shift:], dt, axis=1), dt, axis=1), np.gradient(
-            np.gradient(seismo_z[:, 0, shift:], dt, axis=1), dt, axis=1), moment[0][shift:]
-    elif deriv == 'VEL':
-        return np.gradient(seismo_x[:, 0, shift:], dt, axis=1), np.gradient(seismo_y[:, 0, shift:], dt,
-                                                                            axis=1), np.gradient(seismo_z[:, 0, shift:],
-                                                                                                 dt, axis=1), moment[0][
-                                                                                                              shift:]
-    else:
-        return seismo_x[:, 0, shift:], seismo_y[:, 0, shift:], seismo_z[:, 0, shift:], moment[0][shift:]
+    if coord == 'CARTESIAN':
+        vel_x, vel_y = cartesian(vel_r, stationPos_cyl)
+        if deriv == 'ACC':
+            return np.gradient(np.gradient(seismo_x[:, 0, shift:], dt, axis=1), dt, axis=1), np.gradient(
+                np.gradient(seismo_y[:, 0, shift:], dt, axis=1), dt, axis=1), np.gradient(
+                np.gradient(seismo_z[:, 0, shift:], dt, axis=1), dt, axis=1), moment[0][shift:]
+        elif deriv == 'DIS':
+            return np.gradient(seismo_x[:, 0, shift:], dt, axis=1), np.gradient(seismo_y[:, 0, shift:], dt,
+                                                                                axis=1), np.gradient(seismo_z[:, 0, shift:],
+                                                                                                     dt, axis=1), moment[0][
+                                                                                                                  shift:]
+        else:
+            return  
 
 
 def moment_mixed_analytical(SOURCE_TYPE, pressure, height, dt, stationPos, sourceParams, mediumParams, wave_terms, ps_waves,
