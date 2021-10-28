@@ -193,22 +193,33 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
     vel_r = np.real(vel_r)
     vel_tr = np.real(vel_tr)
 
-
-
-
     if coord == 'CARTESIAN':
         vel_x, vel_y = cartesian(vel_r, stationPos_cyl)
         if deriv == 'ACC':
-            return np.gradient(np.gradient(seismo_x[:, 0, shift:], dt, axis=1), dt, axis=1), np.gradient(
-                np.gradient(seismo_y[:, 0, shift:], dt, axis=1), dt, axis=1), np.gradient(
-                np.gradient(seismo_z[:, 0, shift:], dt, axis=1), dt, axis=1), moment[0][shift:]
+            acc_x = np.gradient(vel_x[0], dt, axis=1)
+            acc_y = np.gradient(vel_y[0], dt, axis=1)
+            acc_z = np.gradient(vel_z[0], dt, axis=1)
+            return acc_x, acc_y, acc_z
         elif deriv == 'DIS':
-            return np.gradient(seismo_x[:, 0, shift:], dt, axis=1), np.gradient(seismo_y[:, 0, shift:], dt,
-                                                                                axis=1), np.gradient(seismo_z[:, 0, shift:],
-                                                                                                     dt, axis=1), moment[0][
-                                                                                                                  shift:]
+            dis_x = sint.cumtrapz(vel_x[0], x=time, initial=0)
+            dis_y = sint.cumtrapz(vel_y[0], x=time, initial=0)
+            dis_z = sint.cumtrapz(vel_z[0], x=time, initial=0)
+            return dis_x, dis_y, dis_z
         else:
-            return  
+            return vel_x, vel_y, vel_z
+    else:
+        if deriv == 'ACC':
+            acc_r = np.gradient(vel_r[0], dt, axis=1)
+            acc_z = np.gradient(vel_z[0], dt, axis=1)
+            acc_tr = np.gradient(vel_tr[0], dt, axis=1)
+            return acc_r, acc_z, acc_tr
+        elif deriv == 'DIS':
+            dis_r = sint.cumtrapz(vel_r[0], x=time, initial=0)
+            dis_z = sint.cumtrapz(vel_z[0], x=time, initial=0)
+            dis_tr = sint.cumtrapz(vel_tr[0], x=time, initial=0)
+            return dis_r, dis_z, dis_tr
+        else:
+            return vel_r, vel_z, vel_tr
 
 
 def moment_mixed_analytical(SOURCE_TYPE, pressure, height, dt, stationPos, sourceParams, mediumParams, wave_terms, ps_waves,
