@@ -12,6 +12,7 @@ from zipfile import ZipFile
 import scipy.signal as sg
 import scipy.interpolate as si
 
+import load_data as ld
 import point_source as PS
 import helpers as hp
 import source_setup as ss
@@ -117,7 +118,7 @@ directory = '/Users/kcoppess/muspelheim/simulation-results/high-res/'+SIMULATION
 zip_filename = directory+'.zip'
 
 if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
-    p, time, height = PS.moment_ZIP_load(zip_filename, SOURCE_TYPE, TOTAL_TIME)
+    p, time, height = ld.moment_ZIP_load(zip_filename, SOURCE_TYPE, TOTAL_TIME)
     if TIME_INPUT == 'MANUAL':  # option to manually set moment time series
         p = MOMENT_PRESSURE
         time = MANUAL_TIME
@@ -130,7 +131,7 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
         np.savetxt(save_file+'MOMENT__r'+str(int(rr))+'_z.gz', z_mom, delimiter=',')
         np.savetxt(save_file+'MOMENT.gz', moment, delimiter=',')
 if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
-    f, time, height = PS.force_ZIP_load(zip_filename, SOURCE_TYPE, TOTAL_TIME)
+    f, time, height = ld.force_ZIP_load(zip_filename, SOURCE_TYPE, TOTAL_TIME)
     if TIME_INPUT == 'MANUAL':  # option to manually set force time series
         f = FORCE_PRESSURE
         time = MANUAL_TIME
@@ -177,7 +178,7 @@ for ii in range(nn):
     rad[ii,:], tra[ii,:], ver[ii,:] = hp.cartesian_to_cylindrical(x[ii], y[ii], z[ii], pos[ii])
 
 gc.collect()
-# In[ ]:
+
 
 print(SOURCE_TYPE+' '+CONTRIBUTION)
 
