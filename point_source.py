@@ -106,6 +106,7 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
     ---RETURNS---
     $$_x, $$_y, $$_z        : (# stations, # time points) : chosen deriv applied to syn seis if CARTESIAN
     OR $$_r, $$_z, $$_tr                                        OR CYLINDRICAL
+    moment                  : (# time points)             : moment history
     """
     dt = time[2] - time[1]
 
@@ -191,27 +192,27 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
             acc_x = np.gradient(vel_x[0], dt, axis=1)
             acc_y = np.gradient(vel_y[0], dt, axis=1)
             acc_z = np.gradient(vel_z[0], dt, axis=1)
-            return acc_x, acc_y, acc_z
+            return acc_x, acc_y, acc_z, moment[0]
         elif deriv == 'DIS':
             dis_x = sint.cumtrapz(vel_x[0], x=time, initial=0)
             dis_y = sint.cumtrapz(vel_y[0], x=time, initial=0)
             dis_z = sint.cumtrapz(vel_z[0], x=time, initial=0)
-            return dis_x, dis_y, dis_z
+            return dis_x, dis_y, dis_z, moment[0]
         else:
-            return vel_x, vel_y, vel_z
+            return vel_x, vel_y, vel_z, moment[0]
     else:
         if deriv == 'ACC':
             acc_r = np.gradient(vel_r[0], dt, axis=1)
             acc_z = np.gradient(vel_z[0], dt, axis=1)
             acc_tr = np.gradient(vel_tr[0], dt, axis=1)
-            return acc_r, acc_z, acc_tr
+            return acc_r, acc_z, acc_tr, moment[0]
         elif deriv == 'DIS':
             dis_r = sint.cumtrapz(vel_r[0], x=time, initial=0)
             dis_z = sint.cumtrapz(vel_z[0], x=time, initial=0)
             dis_tr = sint.cumtrapz(vel_tr[0], x=time, initial=0)
-            return dis_r, dis_z, dis_tr
+            return dis_r, dis_z, dis_tr, moment[0]
         else:
-            return vel_r, vel_z, vel_tr
+            return vel_r, vel_z, vel_tr, moment[0]
 
 
 def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, sourceParams, mediumParams, 
@@ -255,6 +256,7 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
     ---RETURNS---
     $$_x, $$_y, $$_z        : (# stations, # time points) : chosen deriv applied to syn seis if CARTESIAN
     OR $$_r, $$_z, $$_tr                                        OR CYLINDRICAL
+    force                   : (# time points)             : force history
     """
     dt = time[2] - time[1]
 
@@ -319,27 +321,27 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
             acc_x = np.gradient(vel_x[0], dt, axis=1)
             acc_y = np.gradient(vel_y[0], dt, axis=1)
             acc_z = np.gradient(vel_z[0], dt, axis=1)
-            return acc_x, acc_y, acc_z
+            return acc_x, acc_y, acc_z, force[0]
         elif deriv == 'DIS':
             dis_x = sint.cumtrapz(vel_x[0], x=time, initial=0)
             dis_y = sint.cumtrapz(vel_y[0], x=time, initial=0)
             dis_z = sint.cumtrapz(vel_z[0], x=time, initial=0)
-            return dis_x, dis_y, dis_z
+            return dis_x, dis_y, dis_z, force[0]
         else:
-            return vel_x, vel_y, vel_z
+            return vel_x, vel_y, vel_z, force[0]
     else:
         if deriv == 'ACC':
             acc_r = np.gradient(vel_r[0], dt, axis=1)
             acc_z = np.gradient(vel_z[0], dt, axis=1)
             acc_tr = np.gradient(vel_tr[0], dt, axis=1)
-            return acc_r, acc_z, acc_tr
+            return acc_r, acc_z, acc_tr, force[0]
         elif deriv == 'DIS':
             dis_r = sint.cumtrapz(vel_r[0], x=time, initial=0)
             dis_z = sint.cumtrapz(vel_z[0], x=time, initial=0)
             dis_tr = sint.cumtrapz(vel_tr[0], x=time, initial=0)
-            return dis_r, dis_z, dis_tr
+            return dis_r, dis_z, dis_tr, force[0]
         else:
-            return vel_r, vel_z, vel_tr
+            return vel_r, vel_z, vel_tr, force[0]
 
 
 def moment_mixed_analytical(SOURCE_TYPE, pressure, height, dt, stationPos, sourceParams, mediumParams, wave_terms, ps_waves,
