@@ -16,6 +16,7 @@ import helpers as hp
 import source_setup as ss
 import bodywaves_functions as bw
 import surfacewaves_functions as sw
+import load_gfs as gf
 
 
 def cylindrical(original):
@@ -165,8 +166,8 @@ def force_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME):
     return f, time, height
 
 
-def moment_general(SOURCE_TYPE, pressure, height, dt, stationPos, sourceParams, mediumParams, wave_terms, ps_waves,
-                     WAVE='BOTH', deriv='DIS', SOURCE_FILTER=False):
+def moment_general(SOURCE_TYPE, pressure, height, dt, stationPos, sourceParams, mediumParams, 
+                    deriv='DIS', SOURCE_FILTER=False):
     """
     calculates the point source synthetic seismograms from moment contributions at given station positions
     using loaded Green's functions
@@ -192,9 +193,6 @@ def moment_general(SOURCE_TYPE, pressure, height, dt, stationPos, sourceParams, 
                                                     source position vector]
     mediumParams  : [2]                        : [shear modulus (Pa), rock density (kg/m^3)]
                                                  (assumes Poisson ratio = 1/4)
-    WAVE          : string                     : 'BOTH' calculates both body and surface waves (default)
-                                                 'BODY' just calculate body waves
-                                                 'SURF' just calculate surface waves
     deriv         : string                     : seismogram time derivative to return
                                                  (options: 'ACC' acceleration;
                                                            'VEL' velocity;
@@ -211,11 +209,11 @@ def moment_general(SOURCE_TYPE, pressure, height, dt, stationPos, sourceParams, 
     # +z downwards (just for SW calculations)
     stationPos_cyl = cylindrical(stationPos)
 
-    # storing coordinates for separation vectors between point-source and seismometers
-    # separation: (# receivers, # sources)
-    # gamma: (# receivers, # sources, 3)
-    separation, gamma = hp.separation_distances_vectors(stationPos, [sourcePos])
-    gc.collect()
+    ## storing coordinates for separation vectors between point-source and seismometers
+    ## separation: (# receivers, # sources)
+    ## gamma: (# receivers, # sources, 3)
+    #separation, gamma = hp.separation_distances_vectors(stationPos, [sourcePos])
+    #gc.collect()
 
     # phase shift so as to eliminate some edge effects in from fourier transformation
     # number of time steps
@@ -244,9 +242,17 @@ def moment_general(SOURCE_TYPE, pressure, height, dt, stationPos, sourceParams, 
         moment_tensor = np.eye(3) * ((lame + 2 * mu) / mu)
     gc.collect()
 
-    seismo_x = np.zeros((1, np.ma.size(stationPos, axis=0), np.ma.size(moment, axis=1)), dtype='complex')
-    seismo_y = np.zeros((1, np.ma.size(stationPos, axis=0), np.ma.size(moment, axis=1)), dtype='complex')
-    seismo_z = np.zeros((1, np.ma.size(stationPos, axis=0), np.ma.size(moment, axis=1)), dtype='complex')
+    moment_rate = np.gradient(moment, dt, axis=-1)
+    gc.collect()
+
+    NN = np.ma.size(moment, axis=1)  # number of time points
+    RR = np.ma.size(stationPos, axis=0)  # number of receivers
+
+    mom_rate_hat = np.fft.fft(moment_rate, axis=1) * dt
+
+    vel_seismo_x = np.zeros((1, RR, NN), dtype='complex')
+    vel_seismo_y = np.zeros((1, RR, NN), dtype='complex')
+    vel_seismo_z = np.zeros((1, RR, NN), dtype='complex')
 
     if WAVE == 'BODY' or WAVE == 'BOTH':
         body_x, body_y, body_z = bw.displacement_moment(moment, moment_tensor, separation,
