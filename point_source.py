@@ -214,9 +214,9 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
             return vel_r, vel_z, vel_tr
 
 
-def force_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, sourceParams, mediumParams, 
-                    mt_gf_file, deriv='DIS', coord = 'CYLINDRICAL', SOURCE_FILTER=False, INTERPOLATE=False, 
-                    SAVES=False, mt_savefile='greens_functions/'):
+def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, sourceParams, mediumParams, 
+                    sf_gf_file, deriv='DIS', coord = 'CYLINDRICAL', SOURCE_FILTER=False, INTERPOLATE=False, 
+                    SAVES=False, sf_savefile='greens_functions/'):
     """
     calculates the point source synthetic seismograms from single force contributions at given station positions
     using loaded Green's functions
@@ -231,8 +231,8 @@ def force_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, sou
 
     ---INPUTS---
     SOURCE_TYPE   : string                     : either 'CONDUIT' or 'CHAMBER'
-    pressure      : (# time points)            : CHAMBER -> chamber pressure history
-               OR : (# sources, # time points) : CONDUIT -> pressure history along conduit
+    force         : (# time points)            : CHAMBER -> chamber-conduit momentum exchange history
+               OR : (# sources, # time points) : CONDUIT -> shear traction history along conduit
     depths        : (# sources)                : depths of grid points along conduit
     time          : (# time points)            : time array (assumes equal time-stepping)
     stationPos    : (# stations, 3)            : positions of accelerometer/seismometer stations centered
@@ -241,7 +241,7 @@ def force_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, sou
     sourceParams  : [1, (3)]                   : [conduit area (m^2) OR chamber vol (m^3),
                                                     source position vector]
     mediumParams  : [3]                        : [shear modulus (Pa), lame (Pa), rock density (kg/m^3)]
-    mt_gf_file    : string                     : path to directory where MT GF are stored
+    sf_gf_file    : string                     : path to directory where SF GF are stored
     deriv         : string                     : seismogram time derivative to return
                                                  (options: 'ACC' acceleration;
                                                            'VEL' velocity;
@@ -251,7 +251,7 @@ def force_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, sou
     SOURCE_FILTER : bool                       : if True, filters source function before synth-seis calc
     INTERPOLATE   : bool                       : if True, will interpolate loaded GF
     SAVES         : bool                       : if True, will save final GF in savefile directory
-    mt_savefile   : string                     : path to directory where final MT GF are saved
+    sf_savefile   : string                     : path to directory where final SF GF are saved
     ---RETURNS---
     $$_x, $$_y, $$_z        : (# stations, # time points) : chosen deriv applied to syn seis if CARTESIAN
     OR $$_r, $$_z, $$_tr                                        OR CYLINDRICAL
@@ -286,7 +286,7 @@ def force_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, sou
             force = np.array([force_unfil])
     gc.collect()
     
-    force_rate = np.gradient(moment, dt, axis=-1)
+    force_rate = np.gradient(force, dt, axis=-1)
     gc.collect()
 
     TT = np.ma.size(force, axis=1)  # number of time points
