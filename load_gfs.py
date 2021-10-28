@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import scipy.interpolate as si
 import scipy.io as sio
 
-def load_gfs_PS(directory, srctype, time, INTERPOLATE=False, SAVE=False, save_file='gf', PLOT=False):
+def load_gfs_PS(directory, srctype, time, INTERPOLATE_TIME=False, SAVE=False, save_file='gf', PLOT=False):
     '''
     loads in point source Green's functions and can interpolate in time to get compatible
     array dimensions with desired time array
@@ -17,12 +17,12 @@ def load_gfs_PS(directory, srctype, time, INTERPOLATE=False, SAVE=False, save_fi
             time    vertical    radial   transverse
 
     --INPUTS--
-    directory   : string            : path to folder holding Green's function files
-    srctype     : (1)               : source type (0: moment tensor, 1: single force)
-    time        : (# time points)   : desired time array
-    INTERPOLATE : bool              : if True, interpolate to get values at desired time
-    SAVE        : bool              : if True, saves Green's functions to save_file
-    save_file   : string            : path to where Green's functions will be saved
+    directory        : string            : path to folder holding Green's function files
+    srctype          : (1)               : source type (0: moment tensor, 1: single force)
+    time             : (# time points)   : desired time array
+    INTERPOLATE_TIME : bool              : if True, interpolate to get values at desired time
+    SAVE             : bool              : if True, saves Green's functions to save_file
+    save_file        : string            : path to where Green's functions will be saved
     --RETURNS--
     gf_time     : (# time points)        : desired time array
     gfs         : [ (# time points, 3) ] : list of final Green's functions (ver, rad, tra)
@@ -56,7 +56,7 @@ def load_gfs_PS(directory, srctype, time, INTERPOLATE=False, SAVE=False, save_fi
             #plt.plot(gf_time, func[:,1], color=col, label=lab)
         #plt.show()
     new_gfs = []
-    if INTERPOLATE:
+    if INTERPOLATE_TIME:
         tt = len(time)
         dt = time[2] - time[1]
         desired_omega = np.fft.fftfreq(tt, dt) * (2 * np.pi)

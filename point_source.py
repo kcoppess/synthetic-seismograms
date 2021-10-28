@@ -62,8 +62,10 @@ def cartesian(radial, pos_cyl):
     return x, y
 
 
-def moment_general(SOURCE_TYPE, pressure, height, dt, stationPos, sourceParams, mediumParams, 
-                    deriv='DIS', SOURCE_FILTER=False):
+def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, sourceParams, mediumParams, 
+                    mt_gf_file, sf_gf_file, deriv='DIS', coord = 'CYLINDRICAL', 
+                    SOURCE_FILTER=False, INTERPOLATE=False, SAVES=False, 
+                    mt_savefile='greens_functions/', sf_savefile='greens_functions/'):
     """
     calculates the point source synthetic seismograms from moment contributions at given station positions
     using loaded Green's functions
@@ -80,26 +82,34 @@ def moment_general(SOURCE_TYPE, pressure, height, dt, stationPos, sourceParams, 
     SOURCE_TYPE   : string                     : either 'CONDUIT' or 'CHAMBER'
     pressure      : (# time points)            : CHAMBER -> chamber pressure history
                OR : (# sources, # time points) : CONDUIT -> pressure history along conduit
-    height        : (# sources)                : depths of grid points along conduit
-                                                    NB: different sign convention but just used for integration
-    dt            : (dt)                       : time step size (assumes equal time-stepping)
+    depths        : (# sources)                : depths of grid points along conduit
+    time          : (# time points)            : time array (assumes equal time-stepping)
     stationPos    : (# stations, 3)            : positions of accelerometer/seismometer stations centered
                                                     around conduit axis
+    stations      : [# stations]               : station labels which will be used to load relevant GFs
     sourceParams  : [1, (3)]                   : [conduit area (m^2) OR chamber vol (m^3),
                                                     source position vector]
-    mediumParams  : [2]                        : [shear modulus (Pa), rock density (kg/m^3)]
-                                                 (assumes Poisson ratio = 1/4)
+    mediumParams  : [3]                        : [shear modulus (Pa), lame (Pa), rock density (kg/m^3)]
+    mt_gf_file    : string                     : path to directory where MT GF are stored
+    sf_gf_file    : string                     : path to directory where SF GF are stored
     deriv         : string                     : seismogram time derivative to return
                                                  (options: 'ACC' acceleration;
                                                            'VEL' velocity;
                                                            'DIS' displacement)
+    coord         : string                     : coordinate system for the synthetic seimograms
+                                                 (options: 'CARTESIAN' and 'CYLINDRICAL')
     SOURCE_FILTER : bool                       : if True, filters source function before synth-seis calc
+    INTERPOLATE   : bool                       : if True, will interpolate loaded GF
+    SAVES         : bool                       : if True, will save final GF in savefile directory
+    mt_savefile   : string                     : path to directory where final MT GF are saved
+    sf_savefile   : string                     : path to directory where final SF GF are saved
     ---RETURNS---
     seismo_x, seismo_y, seismo_z : (# stations, # time points) : chosen deriv applied to synthetic seismograms
     """
+    dt = time[2] - time[1]
+
     sourceDim, sourcePos = sourceParams
-    mu, rho_rock = mediumParams
-    lame = mu  # poisson ratio = 1/4
+    mu, lame, rho_rock = mediumParams
 
     # converting position vectors into cylindrical coordinates (to use in SW calc)
     # +z downwards (just for SW calculations)
@@ -149,6 +159,10 @@ def moment_general(SOURCE_TYPE, pressure, height, dt, stationPos, sourceParams, 
     vel_seismo_x = np.zeros((1, RR, NN), dtype='complex')
     vel_seismo_y = np.zeros((1, RR, NN), dtype='complex')
     vel_seismo_z = np.zeros((1, RR, NN), dtype='complex')
+
+    
+
+
 
     if WAVE == 'BODY' or WAVE == 'BOTH':
         body_x, body_y, body_z = bw.displacement_moment(moment, moment_tensor, separation,
