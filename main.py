@@ -34,7 +34,6 @@ TOTAL_TIME = 2998  # in seconds
 DT = 0.04 # in seconds (NB: must be same as sampling rate of GFs)
 SAVE = False
 PLOT = True
-print(CONTRIBUTION)
 WAVE_TYPE = 'BOTH'  # SURF, BODY, or BOTH
 print(WAVE_TYPE)
 DERIV = 'DIS'  # ACC, VEL, or DIS
@@ -128,64 +127,48 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
     if TIME_INPUT == 'MANUAL':  # option to manually set moment time series
         p = MOMENT_PRESSURE
         time = MANUAL_TIME
-    dt = time[2] - time[1]
     r_mom, z_mom, tr_mom, moment = PS.moment_general(SOURCE_TYPE, p, height, time, pos, labels, 
                                             [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE)
-    #x_mom, y_mom, z_mom, moment = PS.moment_synthetic(SOURCE_TYPE, p, height, dt, pos, [sourceDim, sourcePos],
-    #                                        [mu, rho_rock], TERMS, PS_TUNER, WAVE=WAVE_TYPE, deriv=DERIV)
     if SAVE:
-        np.savetxt(save_file+'MOMENT__r'+str(int(rr))+'_x.gz', x_mom, delimiter=',')
-        np.savetxt(save_file+'MOMENT__r'+str(int(rr))+'_y.gz', y_mom, delimiter=',')
-        np.savetxt(save_file+'MOMENT__r'+str(int(rr))+'_z.gz', z_mom, delimiter=',')
         np.savetxt(save_file+'MOMENT.gz', moment, delimiter=',')
+        for ii, LAB in zip(range(nn), labels):
+            np.savetxt(save_file+'MOMENT__r'+LAB+'_radial.gz', r_mom[ii], delimiter=',')
+            np.savetxt(save_file+'MOMENT__r'+LAB+'_vertical.gz', z_mom[ii], delimiter=',')
+            np.savetxt(save_file+'MOMENT__r'+LAB+'_transverse.gz', tr_mom[ii], delimiter=',')
 if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
     f, time, height = ld.force_ZIP_load(zip_filename, SOURCE_TYPE, TOTAL_TIME, DT)
     if TIME_INPUT == 'MANUAL':  # option to manually set force time series
         f = FORCE_PRESSURE
         time = MANUAL_TIME
-    dt = time[2] - time[1]
-    x_for, y_for, z_for, force = PS.force_synthetic(SOURCE_TYPE, f, height, dt, pos, [A, sourcePos],
-                                            [mu, rho_rock], TERMS, PS_TUNER, WAVE=WAVE_TYPE, deriv=DERIV)
+    r_for, z_for, tr_for, force = PS.force_general(SOURCE_TYPE, p, height, time, pos, labels, 
+                                            [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE)
     if SAVE:
-        np.savetxt(save_file+'FORCE__r'+str(int(rr))+'_x.gz', x_for, delimiter=',')
-        np.savetxt(save_file+'FORCE__r'+str(int(rr))+'_y.gz', y_for, delimiter=',')
-        np.savetxt(save_file+'FORCE__r'+str(int(rr))+'_z.gz', z_for, delimiter=',')
         np.savetxt(save_file+'FORCE.gz', force, delimiter=',')
+        for ii, LAB in zip(range(nn), labels):
+            np.savetxt(save_file+'FORCE__r'+LAB+'_radial.gz', r_for[ii], delimiter=',')
+            np.savetxt(save_file+'FORCE__r'+LAB+'_vertical.gz', z_for[ii], delimiter=',')
+            np.savetxt(save_file+'FORCE__r'+LAB+'_transverse.gz', tr_for[ii], delimiter=',')
 if SAVE:
     np.savetxt(direc+'TIME.gz', time, delimiter=',')
 
-x = np.zeros((nn, len(time)), dtype='complex')
-y = np.zeros((nn, len(time)), dtype='complex')
+r = np.zeros((nn, len(time)), dtype='complex')
 z = np.zeros((nn, len(time)), dtype='complex')
+tr = np.zeros((nn, len(time)), dtype='complex')
 
 if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
-    x += x_mom
-    gc.collect()
-    y += y_mom
+    r += r_mom
     gc.collect()
     z += z_mom
     gc.collect()
-if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
-    x += x_for
+    tr += tr_mom
     gc.collect()
-    y += y_for
+if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
+    r += r_for
     gc.collect()
     z += z_for
     gc.collect()
-
-'''
-transforming x, y, z waveforms into the radial, vertical, and transverse waveforms
-NOTE: vertical from spherical is positive "downwards"
-                  cylindrical is positive "upwards"
-'''
-NN = len(time)
-rad = np.zeros((nn, NN), dtype = 'complex')
-tra = np.zeros((nn, NN), dtype = 'complex')
-ver = np.zeros((nn, NN), dtype = 'complex')
-for ii in range(nn):
-    rad[ii,:], tra[ii,:], ver[ii,:] = hp.cartesian_to_cylindrical(x[ii], y[ii], z[ii], pos[ii])
-
-gc.collect()
+    tr += tr_for
+    gc.collect()
 
 
 print(SOURCE_TYPE+' '+CONTRIBUTION)
@@ -199,7 +182,7 @@ if PLOT:
     ax1, ax2, ax3 = hp.seismogram_plot_setup([ax1, ax2, ax3], 'single-source:')
 
     for ii in range(nn):
-        ax1.plot(time, rad[ii], color=colors[ii], linestyle=line_styles[0], label=labels[ii], linewidth=1.5)
+        ax1.plot(time, r[ii], color=colors[ii], linestyle=line_styles[0], label=labels[ii], linewidth=1.5)
     ax1.set_ylabel('radial ($r$)')
     ax1.set_xlim(0, np.max(time))
     ax1.legend()
@@ -207,12 +190,12 @@ if PLOT:
     #ax1.set_ylim(-0.00003, 0.00003)
 
     for ii in range(nn):
-        ax2.plot(time, tra[ii], color=colors[ii], linestyle=line_styles[0], linewidth=1.5)
+        ax2.plot(time, tr[ii], color=colors[ii], linestyle=line_styles[0], linewidth=1.5)
     ax2.legend(loc=1, fontsize='small')
     ax2.set_ylabel('transverse ($\phi$)')
 
     for ii in range(nn):
-        ax3.plot(time, ver[ii], color=colors[ii], linestyle=line_styles[0], linewidth=1.5)
+        ax3.plot(time, z[ii], color=colors[ii], linestyle=line_styles[0], linewidth=1.5)
     ax3.set_xlabel('time (s)')
     ax3.set_ylabel('vertical ($\\theta$)')
 
