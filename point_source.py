@@ -301,7 +301,7 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
     vel_tr = np.zeros((1, NN, TT), dtype='complex')
 
     for stat, ii in zip(stations, np.arange(NN)):
-        gf_time, gfs = gf.load_gfs_PS(mt_gf_file+stat+'/', 1, time, INTERPOLATE_TIME=INTERPOLATE, SAVE=SAVES, save_file=sf_savefile, PLOT=False)
+        gf_time, gfs = gf.load_gfs_PS(sf_gf_file+stat+'/', 1, time, INTERPOLATE_TIME=INTERPOLATE, SAVE=SAVES, save_file=sf_savefile, PLOT=False)
         gfs_hat = []
         for gg in gfs:
             gf_hat = np.fft.fft(gg, axis=0) * dt

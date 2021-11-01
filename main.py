@@ -23,7 +23,7 @@ import source_plot as sp
 SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
 SOURCE_TYPE = 'CHAMBER'  # CHAMBER or CONDUIT
 print(SOURCE_TYPE)
-CONTRIBUTION = 'MOMENT'  # MOMENT, FORCE, or BOTH
+CONTRIBUTION = 'FORCE'  # MOMENT, FORCE, or BOTH
 if SOURCE_TYPE == 'CHAMBER':
     MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_mt/'
     SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_sf/'
@@ -133,7 +133,7 @@ if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
     if TIME_INPUT == 'MANUAL':  # option to manually set force time series
         f = FORCE_PRESSURE
         time = MANUAL_TIME
-    r_for, z_for, tr_for, force = PS.force_general(SOURCE_TYPE, p, height, time, pos, labels, 
+    r_for, z_for, tr_for, force = PS.force_general(SOURCE_TYPE, f, height, time, pos, labels, 
                                             [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, INTERPOLATE=True)
     if SAVE:
         np.savetxt(save_file+'FORCE.gz', force, delimiter=',')
