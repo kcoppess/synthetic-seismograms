@@ -129,7 +129,7 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
             filt = sg.lfilter(b, a, dmoment_dz)
         else:
             filt = dmoment_dz
-        moment = hp.integration_trapezoid(height, np.array([filt]))
+        moment = hp.integration_trapezoid(depths, np.array([filt]))
         moment_tensor = ss.moment_tensor_cylindricalSource([lame, mu])
     elif SOURCE_TYPE == 'CHAMBER':
         moment_unfil = ss.moment_density(np.array([pressure]), sourceDim, cushion=shift)[0]
@@ -279,7 +279,7 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
             filt = sg.lfilter(b, a, dforce_dz)
         else:
             filt = dforce_dz
-        force = hp.integration_trapezoid(height, np.array([filt]))
+        force = hp.integration_trapezoid(depths, np.array([filt]))
     elif SOURCE_TYPE == 'CHAMBER':
         force_unfil = ss.moment_density(np.array([force]), sourceDim, cushion=shift)[0]
         if SOURCE_FILTER:

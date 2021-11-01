@@ -19,11 +19,12 @@ import source_setup as ss
 import source_plot as sp
 
 '''Input Section'''
-SIMULATION = '60__RUPTURE__200s_128pts__CHAM_10e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
+#SIMULATION = '60__RUPTURE__200s_128pts__CHAM_10e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
+SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
 SOURCE_TYPE = 'CHAMBER'  # CHAMBER or CONDUIT
 print(SOURCE_TYPE)
 CONTRIBUTION = 'MOMENT'  # MOMENT, FORCE, or BOTH
-TOTAL_TIME = 200  # in seconds
+TOTAL_TIME = 2998  # in seconds
 SAVE = False
 PLOT = True
 print(CONTRIBUTION)
@@ -41,34 +42,32 @@ FORCE_PRESSURE = [0, 1, 2]  # force pressure time series for manual entry
 MANUAL_TIME = [0, 1, 2]  # time for time series for manual entry
 
 conduit_radius = 30  # m
-chamber_vol = 1e7  # m^3
+chamber_vol = 1e5  # m^3
 
 # source depth
 if SOURCE_TYPE == 'CONDUIT':
-    point = 500  # m
+    point = 501.95  # m
 elif SOURCE_TYPE == 'CHAMBER':
-    point = 1030  # m
+    point = 1028.794  # m
 
 '''------------------------------------------------------------------------------------------'''
 '''receiver/seismometer specs'''
 # number of seismometers
-nn = 1
-# all seismometers equal distant from origin (m)
-rr = 3e3
+nn = 4
+# seismometer distances from vent (m)
+rr = [1000, 3000, 10000, 30000]
 
 '''
 spatial coordinate labels
 nn seismometers with (x,y,z) position
-fixing seismometers to y-z plane cutting through the source at origin (x = 0)
+fixing seismometers to x-z plane cutting through the source at origin (y = 0)
 '''
-labels = ['pi/2', 'pi/3', 'pi/4', 'pi/6', '0']
-# unit vector positions for each seismometer
-pos_unit = np.array([[0, 1, 0]])#,
-#                      [0, np.sqrt(3)/2, -0.5],
-#                      [0, np.sqrt(0.5), -np.sqrt(0.5)],
-#                      [0, 0.5, -np.sqrt(3)/2],
-#                      [0, np.sqrt(1-0.9999999999999**2), -0.9999999999999]])
-pos = pos_unit * rr
+labels = ['1km', '3km', '10km', '30km']
+# vector positions for each seismometer
+pos = np.array([[rr[0], 0, 0],
+                [rr[1], 0, 0],
+                [rr[2], 0, 0],
+                [rr[3], 0, 0]])
 
 '''------------------------------------------------------------------------------------------'''
 
@@ -125,6 +124,9 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
     dt = time[2] - time[1]
     r_mom, z_mom, tr_mom, moment = PS.moment_general(SOURCE_TYPE, p, height, time, dt, pos, [sourceDim, sourcePos],
                                             [mu, lame, rho_rock], TERMS, PS_TUNER, WAVE=WAVE_TYPE, deriv=DERIV)
+    moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, sourceParams, mediumParams,
+                    mt_gf_file, deriv='DIS', coord = 'CYLINDRICAL', SOURCE_FILTER=False, INTERPOLATE=False,
+                    SAVES=False, mt_savefile='greens_functions/'):
     #x_mom, y_mom, z_mom, moment = PS.moment_synthetic(SOURCE_TYPE, p, height, dt, pos, [sourceDim, sourcePos],
     #                                        [mu, rho_rock], TERMS, PS_TUNER, WAVE=WAVE_TYPE, deriv=DERIV)
     if SAVE:
