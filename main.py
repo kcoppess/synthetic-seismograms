@@ -30,6 +30,8 @@ if SOURCE_TYPE == 'CHAMBER':
 if SOURCE_TYPE == 'CONDUIT':
     MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_mt/'
     SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_sf/'
+#MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/halfspace-greens/halfA_conduit/halfA_0.14062_mt/'
+#SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/halfspace-greens/halfA_conduit/halfA_0.14062_sf/'
 TOTAL_TIME = 2998  # in seconds
 DT = 0.04 # in seconds (NB: must be same as sampling rate of GFs)
 SAVE = False
@@ -49,11 +51,14 @@ if SOURCE_TYPE == 'CONDUIT':
 elif SOURCE_TYPE == 'CHAMBER':
     point = 1028.794  # m
 
+DEPTH = str(point * 1e-3)
+
 '''------------------------------------------------------------------------------------------'''
 '''receiver/seismometer specs'''
 # number of seismometers
 nn = 4
 # seismometer distances from vent (m)
+#rr = [10000, 30000]
 rr = [1000, 3000, 10000, 30000]
 
 '''
@@ -61,8 +66,11 @@ spatial coordinate labels
 nn seismometers with (x,y,z) position
 fixing seismometers to x-z plane cutting through the source at origin (y = 0)
 '''
+#labels = ['10km', '30km']
 labels = ['1km', '3km', '10km', '30km']
 # vector positions for each seismometer
+#pos = np.array([[rr[0], 0, 0],
+#                [rr[1], 0, 0]])
 pos = np.array([[rr[0], 0, 0],
                 [rr[1], 0, 0],
                 [rr[2], 0, 0],
@@ -121,7 +129,7 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
         p = MOMENT_PRESSURE
         time = MANUAL_TIME
     r_mom, z_mom, tr_mom, moment = PS.moment_general(SOURCE_TYPE, p, height, time, pos, labels, 
-                                            [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, INTERPOLATE=True)
+                                            [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, INTERPOLATE=True, SOURCE_FILTER=True)
     if SAVE:
         np.savetxt(save_file+'MOMENT.gz', moment, delimiter=',')
         for ii, LAB in zip(range(nn), labels):
@@ -134,7 +142,7 @@ if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
         f = FORCE_PRESSURE
         time = MANUAL_TIME
     r_for, z_for, tr_for, force = PS.force_general(SOURCE_TYPE, f, height, time, pos, labels, 
-                                            [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, INTERPOLATE=True)
+                                            [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, INTERPOLATE=True, SOURCE_FILTER=True)
     if SAVE:
         np.savetxt(save_file+'FORCE.gz', force, delimiter=',')
         for ii, LAB in zip(range(nn), labels):
@@ -166,13 +174,21 @@ if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
 
 print(SOURCE_TYPE+' '+CONTRIBUTION)
 
+#if PLOT:
+#    if CONTRIBUTION == 'FORCE':
+#        plt.plot(time, force)
+#        plt.show()
+#    elif CONTRIBUTION == 'MOMENT':
+#        plt.plot(time, moment)
+#        plt.show()
+
 '''plotting combined waveform'''
 if PLOT:
     colors = ['#F0E442', '#E69F00', '#56B4E9', '#009E73', '#000000']
     line_styles = ['-', '--', ':', '-.', '.']
 
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex = True, sharey = False, figsize=(10,10))
-    ax1, ax2, ax3 = hp.seismogram_plot_setup([ax1, ax2, ax3], 'single-source:')
+    ax1, ax2, ax3 = hp.seismogram_plot_setup([ax1, ax2, ax3], 'single-source: '+SOURCE_TYPE+' '+CONTRIBUTION+' '+DEPTH+'km')
 
     for ii in range(nn):
         ax1.plot(time, r[ii], color=colors[ii], linestyle=line_styles[0], label=labels[ii], linewidth=1.5)
