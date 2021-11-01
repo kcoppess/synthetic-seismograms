@@ -24,24 +24,17 @@ SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750
 SOURCE_TYPE = 'CHAMBER'  # CHAMBER or CONDUIT
 print(SOURCE_TYPE)
 CONTRIBUTION = 'MOMENT'  # MOMENT, FORCE, or BOTH
-if SOURCE_TYPE = 'CHAMBER':
+if SOURCE_TYPE == 'CHAMBER':
     MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_mt/'
     SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_sf/'
-if SOURCE_TYPE = 'CONDUIT':
+if SOURCE_TYPE == 'CONDUIT':
     MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_mt/'
     SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_sf/'
 TOTAL_TIME = 2998  # in seconds
 DT = 0.04 # in seconds (NB: must be same as sampling rate of GFs)
 SAVE = False
 PLOT = True
-WAVE_TYPE = 'BOTH'  # SURF, BODY, or BOTH
-print(WAVE_TYPE)
 DERIV = 'DIS'  # ACC, VEL, or DIS
-print(DERIV)
-TERMS = 'all'  # all, near, intermediate, far, near+intermediate
-print(TERMS)
-PS_TUNER = 'pON-sON'  # pON-sON, pON-sOFF, pOFF-sON
-print(PS_TUNER)
 TIME_INPUT = ''  # MANUAL or anything else (anything other than MANUAL draws data from the file directory)
 MOMENT_PRESSURE = [0, 1, 2]  # moment pressure time series for manual entry
 FORCE_PRESSURE = [0, 1, 2]  # force pressure time series for manual entry
@@ -83,9 +76,9 @@ v_p = 4000 # m/s
 # density
 rho_rock = 2700  # kg/m^3
 # shear modulus (when mu = 0, just have p-waves and matches acoustic)
-mu = rho * v_s**2  # Pa
+mu = rho_rock * v_s**2  # Pa
 # p-wave modulus
-Kp = rho * v_p**2  # Pa
+Kp = rho_rock * v_p**2  # Pa
 # Lame parameter
 lame = Kp - 2 * mu
 
@@ -128,7 +121,7 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
         p = MOMENT_PRESSURE
         time = MANUAL_TIME
     r_mom, z_mom, tr_mom, moment = PS.moment_general(SOURCE_TYPE, p, height, time, pos, labels, 
-                                            [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE)
+                                            [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, INTERPOLATE=True)
     if SAVE:
         np.savetxt(save_file+'MOMENT.gz', moment, delimiter=',')
         for ii, LAB in zip(range(nn), labels):
@@ -141,7 +134,7 @@ if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
         f = FORCE_PRESSURE
         time = MANUAL_TIME
     r_for, z_for, tr_for, force = PS.force_general(SOURCE_TYPE, p, height, time, pos, labels, 
-                                            [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE)
+                                            [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, INTERPOLATE=True)
     if SAVE:
         np.savetxt(save_file+'FORCE.gz', force, delimiter=',')
         for ii, LAB in zip(range(nn), labels):

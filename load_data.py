@@ -2,6 +2,7 @@ import numpy as np
 import gc
 from zipfile import ZipFile
 import scipy.interpolate as si
+import io
 
 
 def moment_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME, dt):

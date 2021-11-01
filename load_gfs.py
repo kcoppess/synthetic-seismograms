@@ -64,7 +64,7 @@ def load_gfs_PS(directory, srctype, time, INTERPOLATE_TIME=False, SAVE=False, sa
         sorted_desired_omega = np.concatenate((desired_omega[ind:], desired_omega[:ind]))
         for func, lab, col in zip(gfs_hat, components, colors):
             sorted_func = np.concatenate((func[gf_ind:], func[:gf_ind]))
-            smooth = si.interp1d(sorted_gf_omega, sorted_func, axis=0, kind='cubic')
+            smooth = si.interp1d(sorted_gf_omega, sorted_func, axis=0, kind='cubic', fill_value='extrapolate')
             sorted_gf_hat_sm = smooth(sorted_desired_omega)
             if PLOT:
                 #plt.plot(sorted_gf_omega[:-1], np.abs(smooth(sorted_gf_omega[:-1])[:,1]), color=col)
@@ -149,7 +149,7 @@ def load_gfs_ES(directory, srctype, time, depths, INTERPOLATE_TIME=False, INTERP
         sorted_desired_omega = np.concatenate((desired_omega[ind:], desired_omega[:ind]))
         for func, lab, col in zip(gfs_hat, components, colors):
             sorted_func = np.concatenate((func[gf_ind:], func[:gf_ind]))
-            smooth = si.interp1d(sorted_gf_omega, sorted_func, axis=1, kind='cubic')
+            smooth = si.interp1d(sorted_gf_omega, sorted_func, axis=1, kind='cubic', fill_value='extrapolate')
             sorted_gf_hat_sm = smooth(sorted_desired_omega)
             if PLOT:
                 #plt.plot(sorted_gf_omega[:-1], np.abs(smooth(sorted_gf_omega[:-1])[:,1]), color=col)
@@ -168,7 +168,7 @@ def load_gfs_ES(directory, srctype, time, depths, INTERPOLATE_TIME=False, INTERP
         sorted_desired_omega = np.concatenate((desired_omega[ind:], desired_omega[:ind]))
         for func, lab, col in zip(new_gfs1_hat, components, colors):
             sorted_func = np.concatenate((func[gf_ind:], func[:gf_ind]))
-            smooth = si.interp1d(sorted_gf_omega, sorted_func, axis=0, kind='cubic')
+            smooth = si.interp1d(sorted_gf_omega, sorted_func, axis=0, kind='cubic', fill_value='extrapolate')
             sorted_gf_hat_sm = smooth(sorted_desired_omega)
             if PLOT:
                 #plt.plot(sorted_gf_omega[:-1], np.abs(smooth(sorted_gf_omega[:-1])[:,1]), color=col)

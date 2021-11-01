@@ -124,7 +124,7 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
     b, a = sg.butter(3, normal_cutoff, btype='low', analog=False)
 
     if SOURCE_TYPE == 'CONDUIT':
-        dmoment_dz = ss.moment_density(pressure, sourceDim, cushion=shift)
+        dmoment_dz = ss.moment_density(pressure, sourceDim, cushion=0)
         if SOURCE_FILTER:
             filt = sg.lfilter(b, a, dmoment_dz)
         else:
@@ -132,7 +132,7 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
         moment = hp.integration_trapezoid(depths, np.array([filt]))
         moment_tensor = ss.moment_tensor_cylindricalSource([lame, mu])
     elif SOURCE_TYPE == 'CHAMBER':
-        moment_unfil = ss.moment_density(np.array([pressure]), sourceDim, cushion=shift)[0]
+        moment_unfil = ss.moment_density(np.array([pressure]), sourceDim, cushion=0)[0]
         if SOURCE_FILTER:
             moment = [sg.lfilter(b, a, moment_unfil)]
         else:
@@ -153,7 +153,7 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
     vel_tr = np.zeros((1, NN, TT), dtype='complex')
 
     for stat, ii in zip(stations, np.arange(NN)):
-        gf_time, gfs = gf.load_gfs(mt_gf_file+stat+'/', 0, time, INTERPOLATE_TIME=INTERPOLATE, SAVE=SAVES, 
+        gf_time, gfs = gf.load_gfs_PS(mt_gf_file+stat+'/', 0, time, INTERPOLATE_TIME=INTERPOLATE, SAVE=SAVES, 
                                     save_file=mt_savefile, PLOT=False)
         gfs_hat = []
         for gg in gfs:
@@ -274,14 +274,14 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
     b, a = sg.butter(3, normal_cutoff, btype='low', analog=False)
 
     if SOURCE_TYPE == 'CONDUIT':
-        dforce_dz = ss.moment_density(force, sourceDim, cushion=shift)
+        dforce_dz = ss.moment_density(force, sourceDim, cushion=0)
         if SOURCE_FILTER:
             filt = sg.lfilter(b, a, dforce_dz)
         else:
             filt = dforce_dz
         force = hp.integration_trapezoid(depths, np.array([filt]))
     elif SOURCE_TYPE == 'CHAMBER':
-        force_unfil = ss.moment_density(np.array([force]), sourceDim, cushion=shift)[0]
+        force_unfil = ss.moment_density(np.array([force]), sourceDim, cushion=0)[0]
         if SOURCE_FILTER:
             force = np.array([sg.lfilter(b, a, force_unfil)])
         else:
@@ -301,7 +301,7 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
     vel_tr = np.zeros((1, NN, TT), dtype='complex')
 
     for stat, ii in zip(stations, np.arange(NN)):
-        gf_time, gfs = gf.load_gfs(mt_gf_file+stat+'/', 1, time, INTERPOLATE_TIME=INTERPOLATE, SAVE=SAVES, save_file=sf_savefile, PLOT=False)
+        gf_time, gfs = gf.load_gfs_PS(mt_gf_file+stat+'/', 1, time, INTERPOLATE_TIME=INTERPOLATE, SAVE=SAVES, save_file=sf_savefile, PLOT=False)
         gfs_hat = []
         for gg in gfs:
             gf_hat = np.fft.fft(gg, axis=0) * dt
