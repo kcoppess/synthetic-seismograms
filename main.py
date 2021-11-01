@@ -24,7 +24,14 @@ SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750
 SOURCE_TYPE = 'CHAMBER'  # CHAMBER or CONDUIT
 print(SOURCE_TYPE)
 CONTRIBUTION = 'MOMENT'  # MOMENT, FORCE, or BOTH
+if SOURCE_TYPE = 'CHAMBER':
+    MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_mt/'
+    SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_sf/'
+if SOURCE_TYPE = 'CONDUIT':
+    MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_mt/'
+    SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_sf/'
 TOTAL_TIME = 2998  # in seconds
+DT = 0.04 # in seconds (NB: must be same as sampling rate of GFs)
 SAVE = False
 PLOT = True
 print(CONTRIBUTION)
@@ -117,16 +124,13 @@ directory = '/Users/kcoppess/muspelheim/simulation-results/high-res/'+SIMULATION
 zip_filename = directory+'.zip'
 
 if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
-    p, time, height = ld.moment_ZIP_load(zip_filename, SOURCE_TYPE, TOTAL_TIME)
+    p, time, height = ld.moment_ZIP_load(zip_filename, SOURCE_TYPE, TOTAL_TIME, DT)
     if TIME_INPUT == 'MANUAL':  # option to manually set moment time series
         p = MOMENT_PRESSURE
         time = MANUAL_TIME
     dt = time[2] - time[1]
-    r_mom, z_mom, tr_mom, moment = PS.moment_general(SOURCE_TYPE, p, height, time, dt, pos, [sourceDim, sourcePos],
-                                            [mu, lame, rho_rock], TERMS, PS_TUNER, WAVE=WAVE_TYPE, deriv=DERIV)
-    moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, sourceParams, mediumParams,
-                    mt_gf_file, deriv='DIS', coord = 'CYLINDRICAL', SOURCE_FILTER=False, INTERPOLATE=False,
-                    SAVES=False, mt_savefile='greens_functions/'):
+    r_mom, z_mom, tr_mom, moment = PS.moment_general(SOURCE_TYPE, p, height, time, pos, labels, 
+                                            [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE)
     #x_mom, y_mom, z_mom, moment = PS.moment_synthetic(SOURCE_TYPE, p, height, dt, pos, [sourceDim, sourcePos],
     #                                        [mu, rho_rock], TERMS, PS_TUNER, WAVE=WAVE_TYPE, deriv=DERIV)
     if SAVE:
@@ -135,7 +139,7 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
         np.savetxt(save_file+'MOMENT__r'+str(int(rr))+'_z.gz', z_mom, delimiter=',')
         np.savetxt(save_file+'MOMENT.gz', moment, delimiter=',')
 if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
-    f, time, height = ld.force_ZIP_load(zip_filename, SOURCE_TYPE, TOTAL_TIME)
+    f, time, height = ld.force_ZIP_load(zip_filename, SOURCE_TYPE, TOTAL_TIME, DT)
     if TIME_INPUT == 'MANUAL':  # option to manually set force time series
         f = FORCE_PRESSURE
         time = MANUAL_TIME

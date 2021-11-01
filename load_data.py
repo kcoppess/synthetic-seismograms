@@ -4,7 +4,7 @@ from zipfile import ZipFile
 import scipy.interpolate as si
 
 
-def moment_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME):
+def moment_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME, dt):
     """
     loads pressure time series and applies signal processing (smoothing and constant
     time-stepping)
@@ -14,6 +14,7 @@ def moment_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME):
     SOURCE_TYPE: string : 'CONDUIT' -> load conduit pressure
                           'CHAMBER' -> load chamber pressure
     TOTAL_TIME : 1      : total simulation time
+    dt         : 1      : desired time-step size
     ---RETURNS---
     p     : (# sources, # time points) : CONDUIT
             (# time points)            : CHAMBER
@@ -37,7 +38,6 @@ def moment_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME):
     directory.close()
 
     '''signal processing to smooth out numerical effects (e.g. from downsampling)'''
-    dt = time1[2] - time1[1]
     length = int(TOTAL_TIME / dt)
     time = np.arange(length) * dt
 
@@ -56,7 +56,7 @@ def moment_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME):
     return p, time, height
 
 
-def force_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME):
+def force_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME, dt):
     """
     loads force time series and applies signal processing (smoothing and constant
     time-stepping)
@@ -66,6 +66,7 @@ def force_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME):
     SOURCE_TYPE: string : 'CONDUIT' -> load conduit shear pressure
                           'CHAMBER' -> load chamber pressure
     TOTAL_TIME : 1      : total simulation time
+    dt         : 1      : desired time-step size
     ---RETURNS---
     f     : (# sources, # time points) : CONDUIT
             (# time points)            : CHAMBER
@@ -89,7 +90,6 @@ def force_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME):
     directory.close()
 
     '''signal processing to smooth out numerical effects (e.g. from downsampling)'''
-    dt = time1[2] - time1[1]
     length = int(TOTAL_TIME / dt)
     time = np.arange(length) * dt
 
