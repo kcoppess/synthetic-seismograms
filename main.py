@@ -14,6 +14,7 @@ import scipy.interpolate as si
 
 import load_data as ld
 import point_source as PS
+import extended_source as ES
 import helpers as hp
 import source_setup as ss
 import source_plot as sp
@@ -21,15 +22,19 @@ import source_plot as sp
 '''Input Section'''
 #SIMULATION = '60__RUPTURE__200s_128pts__CHAM_10e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
 SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
-SOURCE_TYPE = 'CHAMBER'  # CHAMBER or CONDUIT
-print(SOURCE_TYPE)
-CONTRIBUTION = 'FORCE'  # MOMENT, FORCE, or BOTH
+SOURCE_TYPE = 'CONDUIT'  # CHAMBER or CONDUIT
+REPRESENTATION = 'ES'  # PS (point source) or ES (extended source; ONLY FOR CONDUIT)
+CONTRIBUTION = 'MOMENT'  # MOMENT, FORCE, or BOTH
 if SOURCE_TYPE == 'CHAMBER':
     MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_mt/'
     SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_sf/'
 if SOURCE_TYPE == 'CONDUIT':
-    MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_mt/'
-    SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_sf/'
+    if REPRESENTATION == 'PS':
+        MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_mt/'
+        SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_sf/'
+    elif REPRESENTATION == 'ES':
+        MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_mt/'
+        SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_sf/'
 #MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/halfspace-greens/halfA_conduit/halfA_0.14062_mt/'
 #SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/halfspace-greens/halfA_conduit/halfA_0.14062_sf/'
 TOTAL_TIME = 2998  # in seconds
@@ -51,7 +56,10 @@ if SOURCE_TYPE == 'CONDUIT':
 elif SOURCE_TYPE == 'CHAMBER':
     point = 1028.794  # m
 
-DEPTH = str(point * 1e-3)
+if REPRESENTATION == 'PS':
+    DEPTH = str(point * 1e-3)
+else:
+    DEPTH = ''
 
 '''------------------------------------------------------------------------------------------'''
 '''receiver/seismometer specs'''
@@ -115,7 +123,7 @@ sourcePos = np.array([0,0,-point])
 '''loading data and setting up directories'''
 
 direc = '/Users/kcoppess/muspelheim/synthetic-seismograms/seismos/'+SIMULATION+'/'
-save_file = direc+SOURCE_TYPE+'__'
+save_file = direc+SOURCE_TYPE+'__'+REPRESENTATION+'__'
 if not os.path.exists(direc):
     os.makedirs(direc)
 
@@ -125,11 +133,19 @@ zip_filename = directory+'.zip'
 
 if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
     p, time, height = ld.moment_ZIP_load(zip_filename, SOURCE_TYPE, TOTAL_TIME, DT)
+    print('loaded data...')
     if TIME_INPUT == 'MANUAL':  # option to manually set moment time series
         p = MOMENT_PRESSURE
         time = MANUAL_TIME
-    r_mom, z_mom, tr_mom, moment = PS.moment_general(SOURCE_TYPE, p, height, time, pos, labels, 
-                                            [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, INTERPOLATE=True, SOURCE_FILTER=True)
+    if REPRESENTATION == 'PS':
+        r_mom, z_mom, tr_mom, moment = PS.moment_general(SOURCE_TYPE, p, height, time, pos, labels, 
+                                                [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, 
+                                                INTERPOLATE=True, SOURCE_FILTER=True)
+    elif REPRESENTATION == 'ES':
+        r_mom, z_mom, tr_mom, moment = ES.moment_general(p, height, time, pos, labels, 
+                                                [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, 
+                                                INTERPOLATE=True, SOURCE_FILTER=True, SAVES=True, mt_savefile=MT_GF_FILE)
+    gc.collect()
     if SAVE:
         np.savetxt(save_file+'MOMENT.gz', moment, delimiter=',')
         for ii, LAB in zip(range(nn), labels):
@@ -141,8 +157,11 @@ if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
     if TIME_INPUT == 'MANUAL':  # option to manually set force time series
         f = FORCE_PRESSURE
         time = MANUAL_TIME
-    r_for, z_for, tr_for, force = PS.force_general(SOURCE_TYPE, f, height, time, pos, labels, 
-                                            [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, INTERPOLATE=True, SOURCE_FILTER=True)
+    if REPRESENTATION == 'PS':
+        r_for, z_for, tr_for, force = PS.force_general(SOURCE_TYPE, f, height, time, pos, labels, 
+                                                [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, 
+                                                INTERPOLATE=True, SOURCE_FILTER=True)
+    gc.collect()
     if SAVE:
         np.savetxt(save_file+'FORCE.gz', force, delimiter=',')
         for ii, LAB in zip(range(nn), labels):
@@ -151,6 +170,7 @@ if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
             np.savetxt(save_file+'FORCE__r'+LAB+'_transverse.gz', tr_for[ii], delimiter=',')
 if SAVE:
     np.savetxt(direc+'TIME.gz', time, delimiter=',')
+gc.collect()
 
 r = np.zeros((nn, len(time)), dtype='complex')
 z = np.zeros((nn, len(time)), dtype='complex')

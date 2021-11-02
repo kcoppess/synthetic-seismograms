@@ -118,15 +118,26 @@ def load_gfs_ES(directory, srctype, time, depths, INTERPOLATE_TIME=False, INTERP
         components = ['horizontal_force.mat', 'vertical_force.mat']
     colors = ['#F0E442', '#E69F00', '#56B4E9', '#009E73', '#000000', '#E50000']
     
+    if not INTERPOLATE_TIME and not INTERPOLATE_SPACE:
+        gfs = []
+        gf_time = sio.loadmat(directory+'time.mat')['out'][0]
+        gf_depths = sio.loadmat(directory+'depths.mat')['out'].astype(np.float)
+        gf_dt = gf_time[1] - gf_time[0]
+        for com in components:
+            gf = sio.loadmat(directory+com)['out']
+            gfs.append(gf)
+        gc.collect()
+        return gf_time, gfs
+
     gfs = []
     gfs_hat = []
-    gf_time = sio.loadmat(directory+'time.mat')['out']
-    gf_depths = sio.loadmat(directory+'depths.mat')['out']
+    gf_time = sio.loadmat(directory+'time.mat')['out'][0]
+    gf_depths = sio.loadmat(directory+'depths.mat')['out'].astype(np.float)
     gf_dt = gf_time[1] - gf_time[0]
     for com in components:
         gf = sio.loadmat(directory+com)['out']
         gfs.append(gf)
-        gfs_hat.append(np.fft.fft(gf, axis=0) * gf_dt)
+        gfs_hat.append(np.fft.fft(gf, axis=1) * gf_dt)
     gc.collect()
 
     gf_omega = np.fft.fftfreq(len(gf_time), gf_dt) * (2 * np.pi)
@@ -156,31 +167,45 @@ def load_gfs_ES(directory, srctype, time, depths, INTERPOLATE_TIME=False, INTERP
                 plt.plot(sorted_desired_omega, np.abs(sorted_gf_hat_sm[:,1]), '.', color=col)
             gf_hat_sm = np.concatenate((sorted_gf_hat_sm[-ind:], sorted_gf_hat_sm[:-ind]))
             new_gfs1_hat.append(gf_hat_sm)
+            gc.collect()
     else:
         new_gfs1_hat = gfs_hat
+        gc.collect()
     
+    gf_dh = gf_depths[2] - gf_depths[1]
+    gf_space_omega = np.fft.fftfreq(len(gf_depths), gf_dh) * (2 * np.pi)
+
+    gf_ind = np.argwhere(gf_space_omega < 0)[0,0]
+    sorted_gf_space_omega = np.concatenate((gf_space_omega[gf_ind:], gf_space_omega[:gf_ind]))
+    gc.collect()
     new_gfs_hat = []
     if INTERPOLATE_SPACE:
         hh = len(depths)
         dh = depths[2] - depths[1]
-        desired_omega = np.fft.fftfreq(hh, dh) * (2 * np.pi)
-        ind = np.argwhere(desired_omega < 0)[0,0]
-        sorted_desired_omega = np.concatenate((desired_omega[ind:], desired_omega[:ind]))
+        desired_space_omega = np.fft.fftfreq(hh, dh) * (2 * np.pi)
+        ind = np.argwhere(desired_space_omega < 0)[0,0]
+        sorted_desired_space_omega = np.concatenate((desired_space_omega[ind:], desired_space_omega[:ind]))
+        gc.collect()
         for func, lab, col in zip(new_gfs1_hat, components, colors):
             sorted_func = np.concatenate((func[gf_ind:], func[:gf_ind]))
-            smooth = si.interp1d(sorted_gf_omega, sorted_func, axis=0, kind='cubic', fill_value='extrapolate')
-            sorted_gf_hat_sm = smooth(sorted_desired_omega)
-            if PLOT:
-                #plt.plot(sorted_gf_omega[:-1], np.abs(smooth(sorted_gf_omega[:-1])[:,1]), color=col)
-                plt.plot(sorted_desired_omega, np.abs(sorted_gf_hat_sm[:,1]), '.', color=col)
+            smooth = si.interp1d(sorted_gf_space_omega, sorted_func, axis=0, kind='cubic', fill_value='extrapolate')
+            sorted_gf_hat_sm = smooth(sorted_desired_space_omega)
             gf_hat_sm = np.concatenate((sorted_gf_hat_sm[-ind:], sorted_gf_hat_sm[:-ind]))
-            new_gfs.append(gf_hat_sm)
+            new_gfs_hat.append(gf_hat_sm)
+            gc.collect()
     else:
         new_gfs_hat = new_gfs1_hat
+        gc.collect()
     
     new_gfs = []
     for gf_h in new_gfs_hat:
-        new_gfs.append(np.fft.ifft(gf_h, axis=0) / dt)
+        new_gfs.append(np.fft.ifft(gf_h, axis=1) / dt)
+    
+    if SAVE:
+        for func, lab in zip(new_gfs, components):
+            sio.savemat(save_file+'interpolated_depths.mat', mdict = {'out' : depths})
+            sio.savemat(save_file+'interpolated_time.mat', mdict = {'out' : time})
+            sio.savemat(save_file+'interpolated_'+lab, mdict = {'out' : func})
 
     if PLOT:
         plt.legend()

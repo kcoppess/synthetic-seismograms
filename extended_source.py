@@ -126,92 +126,112 @@ def moment_general(pressure, depths, time, stationPos, stations, sourceParams, m
         filt = sg.lfilter(b, a, dmoment_dz)
     else:
         filt = dmoment_dz
-    #moment = hp.integration_trapezoid(depths, np.array([filt]))
+    moment = hp.integration_trapezoid(depths, np.array([filt]))
     moment_tensor = ss.moment_tensor_cylindricalSource([lame, mu])
     gc.collect()
 
     dmoment_rate = np.gradient(dmoment_dz, dt, axis=-1)
     gc.collect()
 
-    TT = np.ma.size(dmoment_dz, axis=2)  # number of time points
+    TT = np.ma.size(dmoment_dz, axis=1)  # number of time points
     NN = np.ma.size(stationPos, axis=0)  # number of receivers
-    HH = np.ma.size(dmoment_dz, axis=1)  # number of sources
+    HH = np.ma.size(dmoment_dz, axis=0)  # number of sources
 
     dmom_rate_hat = np.fft.fft(dmoment_rate, axis=1) * dt
+    gc.collect()
 
-    dvel_z = np.zeros((HH, NN, TT), dtype='complex')
-    dvel_r = np.zeros((HH, NN, TT), dtype='complex')
-    dvel_tr = np.zeros((HH, NN, TT), dtype='complex')
+    dvel_z = np.zeros((NN, HH, TT), dtype='complex')
+    dvel_r = np.zeros((NN, HH, TT), dtype='complex')
+    dvel_tr = np.zeros((NN, HH, TT), dtype='complex')
 
     for stat, ii in zip(stations, np.arange(NN)):
-        gf_time, gfs = gf.load_gfs_PS(mt_gf_file+stat+'/', 0, time, INTERPOLATE_TIME=INTERPOLATE, SAVE=SAVES, 
-                                    save_file=mt_savefile, PLOT=False)
+        print(stat)
+        gf_time, gfs = gf.load_gfs_ES(mt_gf_file+stat+'/', 0, time, depths, INTERPOLATE_TIME=INTERPOLATE, INTERPOLATE_SPACE=INTERPOLATE, 
+                                    SAVE=SAVES, save_file=mt_savefile+stat+'/', PLOT=False)
+        print('loaded gfs...')
         gfs_hat = []
         for gg in gfs:
-            gf_hat = np.fft.fft(gg, axis=0) * dt
+            gf_hat = np.fft.fft(gg, axis=-1) * dt
             gfs_hat.append(gf_hat)
-        vel_z[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,0] * gfs_hat[0][:,0], axis=-1) / dt
-        vel_z[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,1] * gfs_hat[1][:,0], axis=-1) / dt
-        vel_z[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,2] * gfs_hat[2][:,0], axis=-1) / dt
-        vel_z[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[1,1] * gfs_hat[3][:,0], axis=-1) / dt
-        vel_z[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[1,2] * gfs_hat[4][:,0], axis=-1) / dt
-        vel_z[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[2,2] * gfs_hat[5][:,0], axis=-1) / dt
+            gc.collect()
+        print('fourier transformed gfs...')
+        dvel_z[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[0,0] * gfs_hat[0][:,:,0], axis=-1) / dt
+        dvel_z[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[0,1] * gfs_hat[1][:,:,0], axis=-1) / dt
+        dvel_z[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[0,2] * gfs_hat[2][:,:,0], axis=-1) / dt
+        dvel_z[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[1,1] * gfs_hat[3][:,:,0], axis=-1) / dt
+        dvel_z[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[1,2] * gfs_hat[4][:,:,0], axis=-1) / dt
+        dvel_z[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[2,2] * gfs_hat[5][:,:,0], axis=-1) / dt
         gc.collect()
 
-        vel_r[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,0] * gfs_hat[0][:,1], axis=-1) / dt
-        vel_r[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,1] * gfs_hat[1][:,1], axis=-1) / dt
-        vel_r[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,2] * gfs_hat[2][:,1], axis=-1) / dt
-        vel_r[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[1,1] * gfs_hat[3][:,1], axis=-1) / dt
-        vel_r[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[1,2] * gfs_hat[4][:,1], axis=-1) / dt
-        vel_r[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[2,2] * gfs_hat[5][:,1], axis=-1) / dt
+        dvel_r[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[0,0] * gfs_hat[0][:,:,1], axis=-1) / dt
+        dvel_r[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[0,1] * gfs_hat[1][:,:,1], axis=-1) / dt
+        dvel_r[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[0,2] * gfs_hat[2][:,:,1], axis=-1) / dt
+        dvel_r[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[1,1] * gfs_hat[3][:,:,1], axis=-1) / dt
+        dvel_r[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[1,2] * gfs_hat[4][:,:,1], axis=-1) / dt
+        dvel_r[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[2,2] * gfs_hat[5][:,:,1], axis=-1) / dt
         gc.collect()
 
-        vel_tr[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,0] * gfs_hat[0][:,2], axis=-1) / dt
-        vel_tr[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,1] * gfs_hat[1][:,2], axis=-1) / dt
-        vel_tr[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,2] * gfs_hat[2][:,2], axis=-1) / dt
-        vel_tr[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[1,1] * gfs_hat[3][:,2], axis=-1) / dt
-        vel_tr[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[1,2] * gfs_hat[4][:,2], axis=-1) / dt
-        vel_tr[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[2,2] * gfs_hat[5][:,2], axis=-1) / dt
+        dvel_tr[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[0,0] * gfs_hat[0][:,:,2], axis=-1) / dt
+        dvel_tr[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[0,1] * gfs_hat[1][:,:,2], axis=-1) / dt
+        dvel_tr[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[0,2] * gfs_hat[2][:,:,2], axis=-1) / dt
+        dvel_tr[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[1,1] * gfs_hat[3][:,:,2], axis=-1) / dt
+        dvel_tr[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[1,2] * gfs_hat[4][:,:,2], axis=-1) / dt
+        dvel_tr[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[2,2] * gfs_hat[5][:,:,2], axis=-1) / dt
+        gc.collect()
 
+        print('finished convolution')
+        print('---------------------------------------------')
+
+    vel_z = hp.integration_trapezoid(depths, dvel_z)
+    vel_r = hp.integration_trapezoid(depths, dvel_r)
+    vel_tr = hp.integration_trapezoid(depths, dvel_tr)
+    gc.collect()
+    print('finished integration')
+    
     vel_z = np.real(vel_z)
     vel_r = np.real(vel_r)
     vel_tr = np.real(vel_tr)
 
     if coord == 'CARTESIAN':
         vel_x, vel_y = cartesian(vel_r, stationPos_cyl)
+        gc.collect()
         if deriv == 'ACC':
-            acc_x = np.gradient(vel_x[0], dt, axis=1)
-            acc_y = np.gradient(vel_y[0], dt, axis=1)
-            acc_z = np.gradient(vel_z[0], dt, axis=1)
+            acc_x = np.gradient(vel_x, dt, axis=1)
+            acc_y = np.gradient(vel_y, dt, axis=1)
+            acc_z = np.gradient(vel_z, dt, axis=1)
+            gc.collect()
             return acc_x, acc_y, acc_z, moment[0]
         elif deriv == 'DIS':
-            dis_x = sint.cumtrapz(vel_x[0], x=time, initial=0)
-            dis_y = sint.cumtrapz(vel_y[0], x=time, initial=0)
-            dis_z = sint.cumtrapz(vel_z[0], x=time, initial=0)
+            dis_x = sint.cumtrapz(vel_x, x=time, initial=0)
+            dis_y = sint.cumtrapz(vel_y, x=time, initial=0)
+            dis_z = sint.cumtrapz(vel_z, x=time, initial=0)
+            gc.collect()
             return dis_x, dis_y, dis_z, moment[0]
         else:
             return vel_x, vel_y, vel_z, moment[0]
     else:
         if deriv == 'ACC':
-            acc_r = np.gradient(vel_r[0], dt, axis=1)
-            acc_z = np.gradient(vel_z[0], dt, axis=1)
-            acc_tr = np.gradient(vel_tr[0], dt, axis=1)
+            acc_r = np.gradient(vel_r, dt, axis=1)
+            acc_z = np.gradient(vel_z, dt, axis=1)
+            acc_tr = np.gradient(vel_tr, dt, axis=1)
+            gc.collect()
             return acc_r, acc_z, acc_tr, moment[0]
         elif deriv == 'DIS':
-            dis_r = sint.cumtrapz(vel_r[0], x=time, initial=0)
-            dis_z = sint.cumtrapz(vel_z[0], x=time, initial=0)
-            dis_tr = sint.cumtrapz(vel_tr[0], x=time, initial=0)
+            dis_r = sint.cumtrapz(vel_r, x=time, initial=0)
+            dis_z = sint.cumtrapz(vel_z, x=time, initial=0)
+            dis_tr = sint.cumtrapz(vel_tr, x=time, initial=0)
+            gc.collect()
             return dis_r, dis_z, dis_tr, moment[0]
         else:
             return vel_r, vel_z, vel_tr, moment[0]
 
 
-def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, sourceParams, mediumParams, 
+def force_general(force, depths, time, stationPos, stations, sourceParams, mediumParams, 
                     sf_gf_file, deriv='DIS', coord = 'CYLINDRICAL', SOURCE_FILTER=False, INTERPOLATE=False, 
                     SAVES=False, sf_savefile='greens_functions/'):
     """
-    calculates the point source synthetic seismograms from single force contributions at given station positions
-    using loaded Green's functions
+    calculates the point source synthetic seismograms from CONDUIT single force contributions at given 
+    station positions using loaded Green's functions
 
     NB: all position vectors must be given in (x, y, z) and in units of m
         +x : east
@@ -222,9 +242,7 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
         [] indicate lists
 
     ---INPUTS---
-    SOURCE_TYPE   : string                     : either 'CONDUIT' or 'CHAMBER'
-    force         : (# time points)            : CHAMBER -> chamber-conduit momentum exchange history
-               OR : (# sources, # time points) : CONDUIT -> shear traction history along conduit
+    force         : (# sources, # time points) : shear traction history along conduit
     depths        : (# sources)                : depths of grid points along conduit
     time          : (# time points)            : time array (assumes equal time-stepping)
     stationPos    : (# stations, 3)            : positions of accelerometer/seismometer stations centered
@@ -264,33 +282,28 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
     normal_cutoff = cutoff_freq / nyq_freq
     b, a = sg.butter(3, normal_cutoff, btype='low', analog=False)
 
-    if SOURCE_TYPE == 'CONDUIT':
-        dforce_dz = ss.moment_density(force, sourceDim, cushion=0)
-        if SOURCE_FILTER:
-            filt = sg.lfilter(b, a, dforce_dz)
-        else:
-            filt = dforce_dz
-        force = hp.integration_trapezoid(depths, np.array([filt]))
-    elif SOURCE_TYPE == 'CHAMBER':
-        force_unfil = ss.moment_density(np.array([force]), sourceDim, cushion=0)[0]
-        if SOURCE_FILTER:
-            force = np.array([sg.lfilter(b, a, force_unfil)])
-        else:
-            force = np.array([force_unfil])
+    dforce_dz = ss.moment_density(force, sourceDim, cushion=0)
+    if SOURCE_FILTER:
+        filt = sg.lfilter(b, a, dforce_dz)
+    else:
+        filt = dforce_dz
+    force = hp.integration_trapezoid(depths, np.array([filt]))
     gc.collect()
     
     # NB: Zhu GF for downward impulse
-    force_rate = np.gradient(-force, dt, axis=-1)
+    dforce_rate = np.gradient(-dforce_dz, dt, axis=-1)
     gc.collect()
 
     TT = np.ma.size(force, axis=1)  # number of time points
     NN = np.ma.size(stationPos, axis=0)  # number of receivers
+    HH = np.ma.size(dforce_dz, axis=0)  # number of sources
 
-    for_rate_hat = np.fft.fft(force_rate, axis=1) * dt
+    dfor_rate_hat = np.fft.fft(dforce_rate, axis=1) * dt
+    gc.collect()
 
-    vel_z = np.zeros((1, NN, TT), dtype='complex')
-    vel_r = np.zeros((1, NN, TT), dtype='complex')
-    vel_tr = np.zeros((1, NN, TT), dtype='complex')
+    dvel_z = np.zeros((NN, HH, TT), dtype='complex')
+    dvel_r = np.zeros((NN, HH, TT), dtype='complex')
+    dvel_tr = np.zeros((NN, HH, TT), dtype='complex')
 
     for stat, ii in zip(stations, np.arange(NN)):
         gf_time, gfs = gf.load_gfs_PS(sf_gf_file+stat+'/', 1, time, INTERPOLATE_TIME=INTERPOLATE, SAVE=SAVES, save_file=sf_savefile, PLOT=False)
@@ -298,10 +311,15 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
         for gg in gfs:
             gf_hat = np.fft.fft(gg, axis=0) * dt
             gfs_hat.append(gf_hat)
-        vel_z[0, ii] += np.fft.ifft(for_rate_hat[0] * gfs_hat[1][:,0], axis=-1) / dt
-        vel_r[0, ii] += np.fft.ifft(for_rate_hat[0] * gfs_hat[1][:,1], axis=-1) / dt
-        vel_tr[0, ii] += np.fft.ifft(for_rate_hat[0] * gfs_hat[1][:,2], axis=-1) / dt
+        dvel_z[ii] += np.fft.ifft(dfor_rate_hat * gfs_hat[1][:,0], axis=-1) / dt
+        dvel_r[ii] += np.fft.ifft(dfor_rate_hat * gfs_hat[1][:,1], axis=-1) / dt
+        dvel_tr[ii] += np.fft.ifft(dfor_rate_hat * gfs_hat[1][:,2], axis=-1) / dt
         gc.collect()
+    
+    vel_z = hp.integration_trapezoid(depths, dvel_z)
+    vel_r = hp.integration_trapezoid(depths, dvel_r)
+    vel_tr = hp.integration_trapezoid(depths, dvel_tr)
+    gc.collect()
 
     vel_z = np.real(vel_z)
     vel_r = np.real(vel_r)
@@ -309,28 +327,33 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
 
     if coord == 'CARTESIAN':
         vel_x, vel_y = cartesian(vel_r, stationPos_cyl)
+        gc.collect()
         if deriv == 'ACC':
-            acc_x = np.gradient(vel_x[0], dt, axis=1)
-            acc_y = np.gradient(vel_y[0], dt, axis=1)
-            acc_z = np.gradient(vel_z[0], dt, axis=1)
+            acc_x = np.gradient(vel_x, dt, axis=1)
+            acc_y = np.gradient(vel_y, dt, axis=1)
+            acc_z = np.gradient(vel_z, dt, axis=1)
+            gc.collect()
             return acc_x, acc_y, acc_z, force[0]
         elif deriv == 'DIS':
-            dis_x = sint.cumtrapz(vel_x[0], x=time, initial=0)
-            dis_y = sint.cumtrapz(vel_y[0], x=time, initial=0)
-            dis_z = sint.cumtrapz(vel_z[0], x=time, initial=0)
+            dis_x = sint.cumtrapz(vel_x, x=time, initial=0)
+            dis_y = sint.cumtrapz(vel_y, x=time, initial=0)
+            dis_z = sint.cumtrapz(vel_z, x=time, initial=0)
+            gc.collect()
             return dis_x, dis_y, dis_z, force[0]
         else:
             return vel_x, vel_y, vel_z, force[0]
     else:
         if deriv == 'ACC':
-            acc_r = np.gradient(vel_r[0], dt, axis=1)
-            acc_z = np.gradient(vel_z[0], dt, axis=1)
-            acc_tr = np.gradient(vel_tr[0], dt, axis=1)
+            acc_r = np.gradient(vel_r, dt, axis=1)
+            acc_z = np.gradient(vel_z, dt, axis=1)
+            acc_tr = np.gradient(vel_tr, dt, axis=1)
+            gc.collect()
             return acc_r, acc_z, acc_tr, force[0]
         elif deriv == 'DIS':
-            dis_r = sint.cumtrapz(vel_r[0], x=time, initial=0)
-            dis_z = sint.cumtrapz(vel_z[0], x=time, initial=0)
-            dis_tr = sint.cumtrapz(vel_tr[0], x=time, initial=0)
+            dis_r = sint.cumtrapz(vel_r, x=time, initial=0)
+            dis_z = sint.cumtrapz(vel_z, x=time, initial=0)
+            dis_tr = sint.cumtrapz(vel_tr, x=time, initial=0)
+            gc.collect()
             return dis_r, dis_z, dis_tr, force[0]
         else:
             return vel_r, vel_z, vel_tr, force[0]
