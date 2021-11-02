@@ -140,10 +140,13 @@ def moment_general(pressure, depths, time, stationPos, stations, sourceParams, m
     dmom_rate_hat = np.fft.fft(dmoment_rate, axis=1) * dt
     gc.collect()
 
-    dvel_z = np.zeros((NN, HH, TT), dtype='complex')
-    dvel_r = np.zeros((NN, HH, TT), dtype='complex')
-    dvel_tr = np.zeros((NN, HH, TT), dtype='complex')
+    #dvel_z = np.zeros((NN, HH, TT), dtype='complex')
+    #dvel_r = np.zeros((NN, HH, TT), dtype='complex')
+    #dvel_tr = np.zeros((NN, HH, TT), dtype='complex')
 
+    vel_z = np.zeros((NN, TT), dtype='complex')
+    vel_r = np.zeros((NN, TT), dtype='complex')
+    vel_tr = np.zeros((NN, TT), dtype='complex')
     for stat, ii in zip(stations, np.arange(NN)):
         print(stat)
         gf_time, gfs = gf.load_gfs_ES(mt_gf_file+stat+'/', 0, time, depths, INTERPOLATE_TIME=INTERPOLATE, INTERPOLATE_SPACE=INTERPOLATE, 
@@ -155,36 +158,39 @@ def moment_general(pressure, depths, time, stationPos, stations, sourceParams, m
             gfs_hat.append(gf_hat)
             gc.collect()
         print('fourier transformed gfs...')
-        dvel_z[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[0,0] * gfs_hat[0][:,:,0], axis=-1) / dt
-        dvel_z[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[0,1] * gfs_hat[1][:,:,0], axis=-1) / dt
-        dvel_z[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[0,2] * gfs_hat[2][:,:,0], axis=-1) / dt
-        dvel_z[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[1,1] * gfs_hat[3][:,:,0], axis=-1) / dt
-        dvel_z[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[1,2] * gfs_hat[4][:,:,0], axis=-1) / dt
-        dvel_z[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[2,2] * gfs_hat[5][:,:,0], axis=-1) / dt
+        dvel_z = np.fft.ifft(dmom_rate_hat * moment_tensor[0,0] * gfs_hat[0][:,:,0], axis=-1) / dt
+        dvel_z += np.fft.ifft(dmom_rate_hat * moment_tensor[0,1] * gfs_hat[1][:,:,0], axis=-1) / dt
+        dvel_z += np.fft.ifft(dmom_rate_hat * moment_tensor[0,2] * gfs_hat[2][:,:,0], axis=-1) / dt
+        dvel_z += np.fft.ifft(dmom_rate_hat * moment_tensor[1,1] * gfs_hat[3][:,:,0], axis=-1) / dt
+        dvel_z += np.fft.ifft(dmom_rate_hat * moment_tensor[1,2] * gfs_hat[4][:,:,0], axis=-1) / dt
+        dvel_z += np.fft.ifft(dmom_rate_hat * moment_tensor[2,2] * gfs_hat[5][:,:,0], axis=-1) / dt
+        vel_z[ii] = hp.integration_trapezoid(depths, np.array([dvel_z]))[0]
         gc.collect()
 
-        dvel_r[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[0,0] * gfs_hat[0][:,:,1], axis=-1) / dt
-        dvel_r[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[0,1] * gfs_hat[1][:,:,1], axis=-1) / dt
-        dvel_r[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[0,2] * gfs_hat[2][:,:,1], axis=-1) / dt
-        dvel_r[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[1,1] * gfs_hat[3][:,:,1], axis=-1) / dt
-        dvel_r[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[1,2] * gfs_hat[4][:,:,1], axis=-1) / dt
-        dvel_r[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[2,2] * gfs_hat[5][:,:,1], axis=-1) / dt
+        dvel_r = np.fft.ifft(dmom_rate_hat * moment_tensor[0,0] * gfs_hat[0][:,:,1], axis=-1) / dt
+        dvel_r += np.fft.ifft(dmom_rate_hat * moment_tensor[0,1] * gfs_hat[1][:,:,1], axis=-1) / dt
+        dvel_r += np.fft.ifft(dmom_rate_hat * moment_tensor[0,2] * gfs_hat[2][:,:,1], axis=-1) / dt
+        dvel_r += np.fft.ifft(dmom_rate_hat * moment_tensor[1,1] * gfs_hat[3][:,:,1], axis=-1) / dt
+        dvel_r += np.fft.ifft(dmom_rate_hat * moment_tensor[1,2] * gfs_hat[4][:,:,1], axis=-1) / dt
+        dvel_r += np.fft.ifft(dmom_rate_hat * moment_tensor[2,2] * gfs_hat[5][:,:,1], axis=-1) / dt
+        vel_r[ii] = hp.integration_trapezoid(depths, np.array([dvel_r]))[0]
         gc.collect()
 
-        dvel_tr[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[0,0] * gfs_hat[0][:,:,2], axis=-1) / dt
-        dvel_tr[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[0,1] * gfs_hat[1][:,:,2], axis=-1) / dt
-        dvel_tr[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[0,2] * gfs_hat[2][:,:,2], axis=-1) / dt
-        dvel_tr[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[1,1] * gfs_hat[3][:,:,2], axis=-1) / dt
-        dvel_tr[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[1,2] * gfs_hat[4][:,:,2], axis=-1) / dt
-        dvel_tr[ii] += np.fft.ifft(dmom_rate_hat * moment_tensor[2,2] * gfs_hat[5][:,:,2], axis=-1) / dt
+        dvel_tr = np.fft.ifft(dmom_rate_hat * moment_tensor[0,0] * gfs_hat[0][:,:,2], axis=-1) / dt
+        dvel_tr += np.fft.ifft(dmom_rate_hat * moment_tensor[0,1] * gfs_hat[1][:,:,2], axis=-1) / dt
+        dvel_tr += np.fft.ifft(dmom_rate_hat * moment_tensor[0,2] * gfs_hat[2][:,:,2], axis=-1) / dt
+        dvel_tr += np.fft.ifft(dmom_rate_hat * moment_tensor[1,1] * gfs_hat[3][:,:,2], axis=-1) / dt
+        dvel_tr += np.fft.ifft(dmom_rate_hat * moment_tensor[1,2] * gfs_hat[4][:,:,2], axis=-1) / dt
+        dvel_tr += np.fft.ifft(dmom_rate_hat * moment_tensor[2,2] * gfs_hat[5][:,:,2], axis=-1) / dt
+        vel_tr[ii] = hp.integration_trapezoid(depths, np.array([dvel_tr]))[0]
         gc.collect()
 
         print('finished convolution')
         print('---------------------------------------------')
 
-    vel_z = hp.integration_trapezoid(depths, dvel_z)
-    vel_r = hp.integration_trapezoid(depths, dvel_r)
-    vel_tr = hp.integration_trapezoid(depths, dvel_tr)
+    #vel_z = hp.integration_trapezoid(depths, dvel_z)
+    #vel_r = hp.integration_trapezoid(depths, dvel_r)
+    #vel_tr = hp.integration_trapezoid(depths, dvel_tr)
     gc.collect()
     print('finished integration')
     
