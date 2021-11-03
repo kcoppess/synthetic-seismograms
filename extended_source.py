@@ -307,24 +307,41 @@ def force_general(force, depths, time, stationPos, stations, sourceParams, mediu
     dfor_rate_hat = np.fft.fft(dforce_rate, axis=1) * dt
     gc.collect()
 
-    dvel_z = np.zeros((NN, HH, TT), dtype='complex')
-    dvel_r = np.zeros((NN, HH, TT), dtype='complex')
-    dvel_tr = np.zeros((NN, HH, TT), dtype='complex')
+    #dvel_z = np.zeros((NN, HH, TT), dtype='complex')
+    #dvel_r = np.zeros((NN, HH, TT), dtype='complex')
+    #dvel_tr = np.zeros((NN, HH, TT), dtype='complex')
+    
+    vel_z = np.zeros((NN, TT), dtype='complex')
+    vel_r = np.zeros((NN, TT), dtype='complex')
+    vel_tr = np.zeros((NN, TT), dtype='complex')
 
     for stat, ii in zip(stations, np.arange(NN)):
-        gf_time, gfs = gf.load_gfs_PS(sf_gf_file+stat+'/', 1, time, INTERPOLATE_TIME=INTERPOLATE, SAVE=SAVES, save_file=sf_savefile, PLOT=False)
+        print(stat)
+        gf_time, gfs = gf.load_gfs_ES(sf_gf_file+stat+'/', 1, time, depths, INTERPOLATE_TIME=INTERPOLATE, INTERPOLATE_SPACE=INTERPOLATE, 
+                                    SAVE=SAVES, save_file=sf_savefile+stat+'/', PLOT=False)
         gfs_hat = []
+        print('loaded gfs...')
         for gg in gfs:
-            gf_hat = np.fft.fft(gg, axis=0) * dt
+            gf_hat = np.fft.fft(gg, axis=-1) * dt
             gfs_hat.append(gf_hat)
-        dvel_z[ii] += np.fft.ifft(dfor_rate_hat * gfs_hat[1][:,0], axis=-1) / dt
-        dvel_r[ii] += np.fft.ifft(dfor_rate_hat * gfs_hat[1][:,1], axis=-1) / dt
-        dvel_tr[ii] += np.fft.ifft(dfor_rate_hat * gfs_hat[1][:,2], axis=-1) / dt
+        print('fourier transformed gfs...')
+        dvel_z = np.fft.ifft(dfor_rate_hat * gfs_hat[1][:,0], axis=-1) / dt
+        vel_z[ii] = hp.integration_trapezoid(depths, np.array([dvel_z]))[0]
         gc.collect()
+
+        dvel_r = np.fft.ifft(dfor_rate_hat * gfs_hat[1][:,1], axis=-1) / dt
+        vel_r[ii] = hp.integration_trapezoid(depths, np.array([dvel_r]))[0]
+        gc.collect()
+
+        dvel_tr = np.fft.ifft(dfor_rate_hat * gfs_hat[1][:,2], axis=-1) / dt
+        vel_tr[ii] = hp.integration_trapezoid(depths, np.array([dvel_tr]))[0]
+        gc.collect()
+        print('finished convolution')
+        print('---------------------------------------------')
     
-    vel_z = hp.integration_trapezoid(depths, dvel_z)
-    vel_r = hp.integration_trapezoid(depths, dvel_r)
-    vel_tr = hp.integration_trapezoid(depths, dvel_tr)
+    #vel_z = hp.integration_trapezoid(depths, dvel_z)
+    #vel_r = hp.integration_trapezoid(depths, dvel_r)
+    #vel_tr = hp.integration_trapezoid(depths, dvel_tr)
     gc.collect()
 
     vel_z = np.real(vel_z)

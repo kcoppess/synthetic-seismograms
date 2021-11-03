@@ -172,25 +172,11 @@ def load_gfs_ES(directory, srctype, time, depths, INTERPOLATE_TIME=False, INTERP
         new_gfs1_hat = gfs_hat
         gc.collect()
     
-    gf_dh = gf_depths[2] - gf_depths[1]
-    gf_space_omega = np.fft.fftfreq(len(gf_depths), gf_dh) * (2 * np.pi)
-
-    gf_ind = np.argwhere(gf_space_omega < 0)[0,0]
-    sorted_gf_space_omega = np.concatenate((gf_space_omega[gf_ind:], gf_space_omega[:gf_ind]))
-    gc.collect()
     new_gfs_hat = []
     if INTERPOLATE_SPACE:
-        hh = len(depths)
-        dh = depths[2] - depths[1]
-        desired_space_omega = np.fft.fftfreq(hh, dh) * (2 * np.pi)
-        ind = np.argwhere(desired_space_omega < 0)[0,0]
-        sorted_desired_space_omega = np.concatenate((desired_space_omega[ind:], desired_space_omega[:ind]))
-        gc.collect()
         for func, lab, col in zip(new_gfs1_hat, components, colors):
-            sorted_func = np.concatenate((func[gf_ind:], func[:gf_ind]))
-            smooth = si.interp1d(sorted_gf_space_omega, sorted_func, axis=0, kind='cubic', fill_value='extrapolate')
-            sorted_gf_hat_sm = smooth(sorted_desired_space_omega)
-            gf_hat_sm = np.concatenate((sorted_gf_hat_sm[-ind:], sorted_gf_hat_sm[:-ind]))
+            smooth = si.interp1d(gf_depths, func, axis=0, kind='cubic', fill_value='extrapolate')
+            gf_hat_sm = smooth(depths)
             new_gfs_hat.append(gf_hat_sm)
             gc.collect()
     else:
