@@ -121,8 +121,6 @@ def load_gfs_ES(directory, srctype, time, depths, INTERPOLATE_TIME=False, INTERP
     if not INTERPOLATE_TIME and not INTERPOLATE_SPACE:
         gfs = []
         gf_time = sio.loadmat(directory+'time.mat')['out'][0]
-        gf_depths = sio.loadmat(directory+'depths.mat')['out'].astype(np.float)
-        gf_dt = gf_time[1] - gf_time[0]
         for com in components:
             gf = sio.loadmat(directory+com)['out']
             gfs.append(gf)
@@ -152,9 +150,9 @@ def load_gfs_ES(directory, srctype, time, depths, INTERPOLATE_TIME=False, INTERP
             #plt.plot(gf_time, func[:,1], color=col, label=lab)
         #plt.show()
     new_gfs1_hat = []
+    dt = time[2] - time[1]
     if INTERPOLATE_TIME:
         tt = len(time)
-        dt = time[2] - time[1]
         desired_omega = np.fft.fftfreq(tt, dt) * (2 * np.pi)
         ind = np.argwhere(desired_omega < 0)[0,0]
         sorted_desired_omega = np.concatenate((desired_omega[ind:], desired_omega[:ind]))
@@ -175,7 +173,7 @@ def load_gfs_ES(directory, srctype, time, depths, INTERPOLATE_TIME=False, INTERP
     new_gfs_hat = []
     if INTERPOLATE_SPACE:
         for func, lab, col in zip(new_gfs1_hat, components, colors):
-            smooth = si.interp1d(gf_depths, func, axis=0, kind='cubic', fill_value='extrapolate')
+            smooth = si.interp1d(gf_depths, func, axis=0, kind='linear', fill_value='extrapolate')
             gf_hat_sm = smooth(depths)
             new_gfs_hat.append(gf_hat_sm)
             gc.collect()
