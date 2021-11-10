@@ -130,56 +130,75 @@ def load_gfs_ES(directory, srctype, time, depths, INTERPOLATE_TIME=False, INTERP
     gfs = []
     gfs_hat = []
     gf_time = sio.loadmat(directory+'time.mat')['out'][0]
-    gf_depths = sio.loadmat(directory+'depths.mat')['out'].astype(np.float)
+    gf_tt = len(gf_time)
+    tt = len(time)
+    gf_depths = sio.loadmat(directory+'depths.mat')['out'][:].astype(np.float)*1e3
+    gf_hh = len(gf_depths)
+    hh = len(depths)
     gf_dt = gf_time[1] - gf_time[0]
+    dt = time[1] - time[0]
+
     for com in components:
-        gf = sio.loadmat(directory+com)['out']
+        gf = np.zeros((gf_hh, tt, 3))
+        gf[:,:gf_tt] = sio.loadmat(directory+com)['out'][:]
+        for ii in range(7):
+            gf[-ii] = gf[-7]
+            print(gf_depths[-7])
         gfs.append(gf)
         gfs_hat.append(np.fft.fft(gf, axis=1) * gf_dt)
     gc.collect()
 
-    gf_omega = np.fft.fftfreq(len(gf_time), gf_dt) * (2 * np.pi)
-
-
-    gf_ind = np.argwhere(gf_omega < 0)[0,0]
-    sorted_gf_omega = np.concatenate((gf_omega[gf_ind:], gf_omega[:gf_ind]))
-    
     if PLOT:
-        for func, lab, col in zip(gfs_hat, components, colors):
-            plt.plot(gf_omega, np.abs(func[:,1]), color=col, label=lab)
-            #plt.plot(gf_time, func[:,1], color=col, label=lab)
-        #plt.show()
-    new_gfs1_hat = []
-    dt = time[2] - time[1]
-    if INTERPOLATE_TIME:
-        tt = len(time)
-        desired_omega = np.fft.fftfreq(tt, dt) * (2 * np.pi)
-        ind = np.argwhere(desired_omega < 0)[0,0]
-        sorted_desired_omega = np.concatenate((desired_omega[ind:], desired_omega[:ind]))
-        for func, lab, col in zip(gfs_hat, components, colors):
-            sorted_func = np.concatenate((func[gf_ind:], func[:gf_ind]))
-            smooth = si.interp1d(sorted_gf_omega, sorted_func, axis=1, kind='cubic', fill_value='extrapolate')
-            sorted_gf_hat_sm = smooth(sorted_desired_omega)
-            if PLOT:
-                #plt.plot(sorted_gf_omega[:-1], np.abs(smooth(sorted_gf_omega[:-1])[:,1]), color=col)
-                plt.plot(sorted_desired_omega, np.abs(sorted_gf_hat_sm[:,1]), '.', color=col)
-            gf_hat_sm = np.concatenate((sorted_gf_hat_sm[-ind:], sorted_gf_hat_sm[:-ind]))
-            new_gfs1_hat.append(gf_hat_sm)
-            gc.collect()
-    else:
-        new_gfs1_hat = gfs_hat
-        gc.collect()
-    
+        #plt.pcolormesh(gf_omega, gf_depths, np.abs(gfs_hat[0][:,:,1]))
+        plt.pcolormesh(time, gf_depths, np.real(gfs[0][:,:,1]))
+        plt.xlim(0, 40)
+        plt.ylim(300, 0)
+        plt.ylabel('depth (m)')
+        plt.xlabel('time (s)')
+        plt.title('GFxx radial BEFORE')
+        plt.colorbar()
+        plt.show()
+        #for func, lab, col in zip(gfs_hat, components, colors):
+        #    plt.plot(gf_omega, np.abs(func[:,1]), color=col, label=lab)
+        #    #plt.plot(gf_time, func[:,1], color=col, label=lab)
+        ##plt.show()
+
     new_gfs_hat = []
-    if INTERPOLATE_SPACE:
-        for func, lab, col in zip(new_gfs1_hat, components, colors):
-            smooth = si.interp1d(gf_depths, func, axis=0, kind='linear', fill_value='extrapolate')
-            gf_hat_sm = smooth(depths)
-            new_gfs_hat.append(gf_hat_sm)
-            gc.collect()
-    else:
-        new_gfs_hat = new_gfs1_hat
-        gc.collect()
+    for func, lab, col in zip(gfs_hat, components, colors):
+        smooth = si.interp1d(gf_depths, func, axis=0, kind='linear', fill_value='extrapolate') #bounds_error=False, fill_value=(func[-1], func[0]))
+        gf_hat_sm = smooth(depths)
+        new_gfs_hat.append(gf_hat_sm)
+
+
+    #if INTERPOLATE_TIME:
+    #    tt = len(time)
+    #    desired_omega = np.fft.fftfreq(tt, dt) * (2 * np.pi)
+    #    ind = np.argwhere(desired_omega < 0)[0,0]
+    #    sorted_desired_omega = np.concatenate((desired_omega[ind:], desired_omega[:ind]))
+    #    for func, lab, col in zip(gfs_hat, components, colors):
+    #        sorted_func = np.concatenate((func[gf_ind:], func[:gf_ind]))
+    #        smooth = si.interp1d(sorted_gf_omega, sorted_func, axis=1, kind='cubic', fill_value='extrapolate')
+    #        sorted_gf_hat_sm = smooth(sorted_desired_omega)
+    #        #if PLOT:
+    #        #    #plt.plot(sorted_gf_omega[:-1], np.abs(smooth(sorted_gf_omega[:-1])[:,1]), color=col)
+    #        #    plt.plot(sorted_desired_omega, np.abs(sorted_gf_hat_sm[:,1]), '.', color=col)
+    #        gf_hat_sm = np.concatenate((sorted_gf_hat_sm[-ind:], sorted_gf_hat_sm[:-ind]))
+    #        new_gfs1_hat.append(gf_hat_sm)
+    #        gc.collect()
+    #else:
+    #    new_gfs1_hat = gfs_hat
+    #    gc.collect()
+    
+    #new_gfs_hat = []
+    #if INTERPOLATE_SPACE:
+    #    for func, lab, col in zip(new_gfs1_hat, components, colors):
+    #        smooth = si.interp1d(gf_depths, func, axis=0, kind='linear', fill_value='extrapolate')
+    #        gf_hat_sm = smooth(depths)
+    #        new_gfs_hat.append(gf_hat_sm)
+    #        gc.collect()
+    #else:
+    #    new_gfs_hat = new_gfs1_hat
+    #    gc.collect()
     
     new_gfs = []
     for gf_h in new_gfs_hat:
@@ -192,7 +211,15 @@ def load_gfs_ES(directory, srctype, time, depths, INTERPOLATE_TIME=False, INTERP
             sio.savemat(save_file+'interpolated_'+lab, mdict = {'out' : func})
 
     if PLOT:
-        plt.legend()
+        #plt.pcolormesh(desired_omega, depths, np.abs(new_gfs_hat[0][:,:,1]))
+        plt.pcolormesh(time, depths, np.real(new_gfs[0][:,:,1]))
+        plt.xlim(0, 40)
+        plt.ylim(300, 0)
+        plt.ylabel('depth (m)')
+        plt.xlabel('time (s)')
+        plt.title('GFxx radial AFTER')
+        plt.colorbar()
+        #plt.legend()
         plt.show()
 
     return time, new_gfs

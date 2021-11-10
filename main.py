@@ -37,7 +37,7 @@ if SOURCE_TYPE == 'CONDUIT':
         SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_sf/'
 #MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/halfspace-greens/halfA_conduit/halfA_0.14062_mt/'
 #SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/halfspace-greens/halfA_conduit/halfA_0.14062_sf/'
-TOTAL_TIME = 2998  # in seconds
+TOTAL_TIME = 1500 #2998  # in seconds
 DT = 0.04 # in seconds (NB: must be same as sampling rate of GFs)
 SAVE = False
 PLOT = True
@@ -64,25 +64,25 @@ else:
 '''------------------------------------------------------------------------------------------'''
 '''receiver/seismometer specs'''
 # number of seismometers
-nn = 4
+nn = 1
 # seismometer distances from vent (m)
-#rr = [10000, 30000]
-rr = [1000, 3000, 10000, 30000]
+rr = [30000]
+#rr = [1000, 3000, 10000, 30000]
 
 '''
 spatial coordinate labels
 nn seismometers with (x,y,z) position
 fixing seismometers to x-z plane cutting through the source at origin (y = 0)
 '''
-#labels = ['10km', '30km']
-labels = ['1km', '3km', '10km', '30km']
+labels = ['30km'] #, '30km']
+#labels = ['1km', '3km', '10km', '30km']
 # vector positions for each seismometer
-#pos = np.array([[rr[0], 0, 0],
+pos = np.array([[rr[0], 0, 0]]) #,
 #                [rr[1], 0, 0]])
-pos = np.array([[rr[0], 0, 0],
-                [rr[1], 0, 0],
-                [rr[2], 0, 0],
-                [rr[3], 0, 0]])
+#pos = np.array([[rr[0], 0, 0],
+#                [rr[1], 0, 0],
+#                [rr[2], 0, 0],
+#                [rr[3], 0, 0]])
 
 '''------------------------------------------------------------------------------------------'''
 
@@ -142,7 +142,7 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, 
                                                 INTERPOLATE=True, SOURCE_FILTER=True)
     elif REPRESENTATION == 'ES':
-        r_mom, z_mom, tr_mom, moment = ES.moment_general(p, height, time, pos, labels, 
+        r_mom, z_mom, tr_mom, moment = ES.moment_general(p, np.flip(height), time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, 
                                                 INTERPOLATE=True, SOURCE_FILTER=True, SAVES=True, mt_savefile=MT_GF_FILE)
     gc.collect()
