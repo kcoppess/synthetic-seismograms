@@ -3,8 +3,9 @@ import gc
 import matplotlib.pyplot as plt
 import scipy.interpolate as si
 import scipy.io as sio
+import scipy.integrate as sint
 
-def load_gfs_PS(directory, srctype, time, INTERPOLATE_TIME=False, SAVE=False, save_file='gf', PLOT=False):
+def load_gfs_PS(directory, srctype, time, INTERPOLATE_TIME=False, SAVE=False, save_file='gf', PLOT=False, UU=0):
     '''
     loads in point source Green's functions and can interpolate in time to get compatible
     array dimensions with desired time array
@@ -49,12 +50,25 @@ def load_gfs_PS(directory, srctype, time, INTERPOLATE_TIME=False, SAVE=False, sa
     gf_ind = np.argwhere(gf_omega < 0)[0,0]
     sorted_gf_omega = np.concatenate((gf_omega[gf_ind:], gf_omega[:gf_ind]))
     gc.collect()
+
+    '''-------------------------------------------------------------------------------------'''
+    sig = 0.1
+    time_shift = 6 * sig
+    force_rate = np.exp(-((gf_time - time_shift)/ sig) **2 / 2) / (np.sqrt(2 * np.pi) * sig)
+    
+    force_rate_hat = np.fft.fft(force_rate) * gf_dt
+    force_rate_hat *= np.exp(1j * gf_omega * time_shift)
+    '''-------------------------------------------------------------------------------------'''
     
     if PLOT:
+        plt.title(directory[-5:])
+        plt.axhline(UU, alpha=0.5)
         for func, lab, col in zip(gfs_hat, components, colors):
-            plt.plot(gf_omega, np.abs(func[:,1]), color=col, label=lab)
+            #plt.plot(gf_omega, np.abs(func[:,1]), color=col, label=lab)
             #plt.plot(gf_time, func[:,1], color=col, label=lab)
-        #plt.show()
+            plt.plot(gf_time, sint.cumtrapz(np.fft.ifft(func[:,0], axis=0) / gf_dt, x=gf_time, initial=0), color=col, label=lab) 
+        plt.legend()
+        plt.show()
     new_gfs = []
     if INTERPOLATE_TIME:
         tt = len(time)
@@ -66,9 +80,9 @@ def load_gfs_PS(directory, srctype, time, INTERPOLATE_TIME=False, SAVE=False, sa
             sorted_func = np.concatenate((func[gf_ind:], func[:gf_ind]))
             smooth = si.interp1d(sorted_gf_omega, sorted_func, axis=0, kind='cubic', fill_value='extrapolate')
             sorted_gf_hat_sm = smooth(sorted_desired_omega)
-            if PLOT:
-                #plt.plot(sorted_gf_omega[:-1], np.abs(smooth(sorted_gf_omega[:-1])[:,1]), color=col)
-                plt.plot(sorted_desired_omega, np.abs(sorted_gf_hat_sm[:,1]), '.', color=col)
+            #if PLOT:
+            #    #plt.plot(sorted_gf_omega[:-1], np.abs(smooth(sorted_gf_omega[:-1])[:,1]), color=col)
+            #    plt.plot(sorted_desired_omega, np.abs(sorted_gf_hat_sm[:,1]), '.', color=col)
             gf_hat_sm = np.concatenate((sorted_gf_hat_sm[-ind:], sorted_gf_hat_sm[:-ind]))
             new_gfs.append(np.fft.ifft(gf_hat_sm, axis=0) / dt)
     else:
@@ -78,9 +92,9 @@ def load_gfs_PS(directory, srctype, time, INTERPOLATE_TIME=False, SAVE=False, sa
             combined = np.concatenate((np.array([time]).transpose(), func), axis=1)
             np.savetxt(save_file+'interpolated_'+lab, combined,
                     header="time, vertical, radial, transverse")
-    if PLOT:
-        plt.legend()
-        plt.show()
+    #if PLOT:
+    #    plt.legend()
+    #    plt.show()
 
     return time, new_gfs
 
