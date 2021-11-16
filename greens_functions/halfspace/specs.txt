@@ -1,7 +1,8 @@
 homogeneous elastic halfspace
-vp = 4 km/s
+vp = 3.4641016 km/s
 vs = 2 km/s
 rho = 2.7 g/cm^3
+poisson ratio = 0.25
 
 point source depths (km):
     conduit: 0.25780999999999993 0.50195 0.6289100000000001
