@@ -26,10 +26,8 @@ SOURCE_TYPE = 'CHAMBER'  # CHAMBER or CONDUIT
 REPRESENTATION = 'PS'  # PS (point source) or ES (extended source; ONLY FOR CONDUIT)
 CONTRIBUTION = 'FORCE'  # MOMENT, FORCE, or BOTH
 if SOURCE_TYPE == 'CHAMBER':
-    #MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_mt/'
-    #SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_sf/'
-    MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/half_chamber/half_0.50195_mt/'
-    SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/half_chamber/half_0.50195_sf/'
+    MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_mt/'
+    SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_sf/'
 if SOURCE_TYPE == 'CONDUIT':
     if REPRESENTATION == 'PS':
         MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_mt/'
@@ -90,7 +88,7 @@ pos = np.array([[rr[0], 0, 0],
 
 '''medium parameters set'''
 v_s = 2000 # m/s
-v_p = 4000 # m/s
+v_p = 3464.1016 # m/s
 # density
 rho_rock = 2700  # kg/m^3
 # shear modulus (when mu = 0, just have p-waves and matches acoustic)

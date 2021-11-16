@@ -66,7 +66,7 @@ def load_gfs_PS(directory, srctype, time, INTERPOLATE_TIME=False, SAVE=False, sa
         for func, lab, col in zip(gfs_hat, components, colors):
             #plt.plot(gf_omega, np.abs(func[:,1]), color=col, label=lab)
             #plt.plot(gf_time, func[:,1], color=col, label=lab)
-            plt.plot(gf_time, sint.cumtrapz(np.fft.ifft(func[:,0], axis=0) / gf_dt, x=gf_time, initial=0), color=col, label=lab) 
+            plt.plot(gf_time, sint.cumtrapz(np.fft.ifft(func[:,1], axis=0) / gf_dt, x=gf_time, initial=0), color=col, label=lab) 
         plt.legend()
         plt.show()
     new_gfs = []
