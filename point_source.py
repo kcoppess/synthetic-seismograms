@@ -289,8 +289,7 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
             force = np.array([force_unfil])
     gc.collect()
     
-    # NB: Zhu GF for downward impulse
-    force_rate = np.gradient(-force, dt, axis=-1)
+    force_rate = np.gradient(force, dt, axis=-1)
     gc.collect()
 
     TT = np.ma.size(force, axis=1)  # number of time points

@@ -61,14 +61,16 @@ def load_gfs_PS(directory, srctype, time, INTERPOLATE_TIME=False, SAVE=False, sa
     '''-------------------------------------------------------------------------------------'''
     
     if PLOT:
+        plt.figure()
         plt.title(directory[-5:])
         plt.axhline(UU, alpha=0.5)
         for func, lab, col in zip(gfs_hat, components, colors):
             #plt.plot(gf_omega, np.abs(func[:,1]), color=col, label=lab)
             #plt.plot(gf_time, func[:,1], color=col, label=lab)
-            plt.plot(gf_time, sint.cumtrapz(np.fft.ifft(func[:,1], axis=0) / gf_dt, x=gf_time, initial=0), color=col, label=lab) 
-        plt.legend()
-        plt.show()
+            #plt.plot(gf_time, sint.cumtrapz(np.fft.ifft(func[:,1], axis=0) / gf_dt, x=gf_time, initial=0), color=col, label=lab) 
+            plt.plot(gf_time, np.fft.ifft(func[:,1], axis=0) / gf_dt, color=col, label=lab) 
+        #plt.legend()
+        #plt.show()
     new_gfs = []
     if INTERPOLATE_TIME:
         tt = len(time)
@@ -78,13 +80,28 @@ def load_gfs_PS(directory, srctype, time, INTERPOLATE_TIME=False, SAVE=False, sa
         sorted_desired_omega = np.concatenate((desired_omega[ind:], desired_omega[:ind]))
         for func, lab, col in zip(gfs_hat, components, colors):
             sorted_func = np.concatenate((func[gf_ind:], func[:gf_ind]))
-            smooth = si.interp1d(sorted_gf_omega, sorted_func, axis=0, kind='cubic', fill_value='extrapolate')
-            sorted_gf_hat_sm = smooth(sorted_desired_omega)
-            #if PLOT:
-            #    #plt.plot(sorted_gf_omega[:-1], np.abs(smooth(sorted_gf_omega[:-1])[:,1]), color=col)
-            #    plt.plot(sorted_desired_omega, np.abs(sorted_gf_hat_sm[:,1]), '.', color=col)
+            #smoothreal = si.Akima1DInterpolator(sorted_gf_omega, np.real(sorted_func), axis=0)
+            #smoothimag = si.Akima1DInterpolator(sorted_gf_omega, np.imag(sorted_func), axis=0)
+            #sorted_gf_hat_sm = smoothreal(sorted_desired_omega) + 1j * smoothimag(sorted_desired_omega)
+            #smooth = si.interp1d(sorted_gf_omega, sorted_func, axis=0, kind='cubic', fill_value='extrapolate')
+            #sorted_gf_hat_sm = smooth(sorted_desired_omega)
+            sorted_gf_hat_sm = np.zeros((len(sorted_desired_omega), 3), dtype='complex')
+            smoothreal = si.UnivariateSpline(sorted_gf_omega, np.real(sorted_func[:,0]), k=4, s=0)
+            smoothimag = si.UnivariateSpline(sorted_gf_omega, np.imag(sorted_func[:,0]), k=4, s=0)
+            sorted_gf_hat_sm[:,0] = smoothreal(sorted_desired_omega) + 1j * smoothimag(sorted_desired_omega)
+            smoothreal = si.UnivariateSpline(sorted_gf_omega, np.real(sorted_func[:,1]), k=4, s=0)
+            smoothimag = si.UnivariateSpline(sorted_gf_omega, np.imag(sorted_func[:,1]), k=4, s=0)
+            sorted_gf_hat_sm[:,1] = smoothreal(sorted_desired_omega) + 1j * smoothimag(sorted_desired_omega)
+            smoothreal = si.UnivariateSpline(sorted_gf_omega, np.real(sorted_func[:,2]), k=4, s=0)
+            smoothimag = si.UnivariateSpline(sorted_gf_omega, np.imag(sorted_func[:,2]), k=4, s=0)
+            sorted_gf_hat_sm[:,2] = smoothreal(sorted_desired_omega) + 1j * smoothimag(sorted_desired_omega)
             gf_hat_sm = np.concatenate((sorted_gf_hat_sm[-ind:], sorted_gf_hat_sm[:-ind]))
             new_gfs.append(np.fft.ifft(gf_hat_sm, axis=0) / dt)
+            if PLOT:
+                plt.plot(time, np.fft.ifft(gf_hat_sm[:,1], axis=0) / dt, '.', color=col)
+                #plt.plot(time, sint.cumtrapz(np.fft.ifft(gf_hat_sm[:,1], axis=0) / dt, x=time, initial=0), '.', color=col)
+                #plt.plot(sorted_gf_omega[:-1], np.abs(smooth(sorted_gf_omega[:-1])[:,1]), color=col)
+                #plt.plot(sorted_desired_omega, np.abs(sorted_gf_hat_sm[:,1]), '.', color=col)
     else:
         new_gfs = gfs
     if SAVE:
@@ -92,9 +109,9 @@ def load_gfs_PS(directory, srctype, time, INTERPOLATE_TIME=False, SAVE=False, sa
             combined = np.concatenate((np.array([time]).transpose(), func), axis=1)
             np.savetxt(save_file+'interpolated_'+lab, combined,
                     header="time, vertical, radial, transverse")
-    #if PLOT:
-    #    plt.legend()
-    #    plt.show()
+    if PLOT:
+        plt.legend()
+        plt.show()
 
     return time, new_gfs
 

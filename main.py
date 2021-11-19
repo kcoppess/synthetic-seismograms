@@ -24,7 +24,7 @@ import source_plot as sp
 SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
 SOURCE_TYPE = 'CHAMBER'  # CHAMBER or CONDUIT
 REPRESENTATION = 'PS'  # PS (point source) or ES (extended source; ONLY FOR CONDUIT)
-CONTRIBUTION = 'FORCE'  # MOMENT, FORCE, or BOTH
+CONTRIBUTION = 'MOMENT'  # MOMENT, FORCE, or BOTH
 if SOURCE_TYPE == 'CHAMBER':
     MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_mt/'
     SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_sf/'
@@ -39,7 +39,7 @@ if SOURCE_TYPE == 'CONDUIT':
 #SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/halfspace-greens/halfA_conduit/halfA_0.14062_sf/'
 TOTAL_TIME = 1500 #2998  # in seconds
 DT = 0.04 # in seconds (NB: must be same as sampling rate of GFs)
-SAVE = False
+SAVE = True
 PLOT = True
 DERIV = 'DIS'  # ACC, VEL, or DIS
 TIME_INPUT = ''  # MANUAL or anything else (anything other than MANUAL draws data from the file directory)
@@ -57,7 +57,7 @@ elif SOURCE_TYPE == 'CHAMBER':
     point = 1028.794  # m
 
 if REPRESENTATION == 'PS':
-    DEPTH = str(point * 1e-3)
+    DEPTH = str(point * 1e-3)+' km'
 else:
     DEPTH = ''
 
@@ -208,7 +208,7 @@ if PLOT:
     line_styles = ['-', '--', ':', '-.', '.']
 
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex = True, sharey = False, figsize=(10,10))
-    ax1, ax2, ax3 = hp.seismogram_plot_setup([ax1, ax2, ax3], 'single-source: '+SOURCE_TYPE+' '+CONTRIBUTION+' '+DEPTH+'km')
+    ax1, ax2, ax3 = hp.seismogram_plot_setup([ax1, ax2, ax3], 'single-source: '+SOURCE_TYPE+' '+CONTRIBUTION+' '+DEPTH)
 
     for ii in range(nn):
         ax1.plot(time, r[ii], color=colors[ii], linestyle=line_styles[0], label=labels[ii], linewidth=1.5)
@@ -220,7 +220,6 @@ if PLOT:
 
     for ii in range(nn):
         ax2.plot(time, tr[ii], color=colors[ii], linestyle=line_styles[0], linewidth=1.5)
-    ax2.legend(loc=1, fontsize='small')
     ax2.set_ylabel('transverse ($\phi$)')
 
     for ii in range(nn):

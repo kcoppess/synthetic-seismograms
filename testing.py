@@ -53,9 +53,10 @@ def mt_static_displacement(P, a, f, R):
 #plt.plot(depths, w, label='vertical')
 #plt.show()
 
-gf_file = 'greens_functions/halfspace/halfA_chamber/halfA_1.028794_'
-source_depth = 1028.794
-chamber_vol = 1e5 #m^3
+#gf_file = 'greens_functions/halfspace/halfA_conduit/halfA_0.50195_'
+gf_file = 'greens_functions/halfspace/halfA_chamber/halfA_1.133650_'
+source_depth = 1133.650
+chamber_vol = 1e7 #m^3
 stations = ['1km', '3km', '10km', '30km']
 stat_dist = [1000, 3000, 10000, 30000]
 colors = ['#F0E442', '#E69F00', '#56B4E9', '#009E73', '#000000']
@@ -72,7 +73,7 @@ Kp = rho_rock * v_p**2  # Pa
 lame = Kp - 2 * mu
 
 dt = 0.04
-source_time = np.arange(1000) * dt
+source_time = np.arange(3000) * dt
 print(len(source_time))
 
 nn = len(stations)
@@ -136,6 +137,8 @@ ax1.legend()
 plt.show()
 
 
+'''NOTE: Mogi solution only works for spherical sources'''
+
 pressure_rate = 6.923e6 * np.exp(-((source_time - time_shift) / sig) **2 / 2) / (np.sqrt(2 * np.pi) * sig)
 
 pressure = si.cumtrapz(pressure_rate, x=source_time, initial=0)
@@ -143,6 +146,7 @@ pressure = si.cumtrapz(pressure_rate, x=source_time, initial=0)
 #plt.show()
 moment_rate = ss.moment_density(np.array([pressure_rate]), (3/4) * chamber_vol, cushion=0)[0]
 moment_tensor = np.eye(3) * ((lame + 2 * mu) / mu)
+
 
 moment = si.cumtrapz(moment_rate, x=source_time, initial=0)
 #plt.plot(source_time, moment)
