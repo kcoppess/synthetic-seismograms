@@ -165,7 +165,7 @@ def moment_general(pressure, depths, time, stationPos, stations, sourceParams, m
     for stat, ii in zip(stations, np.arange(NN)):
         print(stat)
         gf_time, gfs = gf.load_gfs_ES(mt_gf_file+stat+'/', 0, time, depths, INTERPOLATE_TIME=INTERPOLATE, INTERPOLATE_SPACE=INTERPOLATE, 
-                                    SAVE=SAVES, save_file=mt_savefile+stat+'/', PLOT=True)
+                                    SAVE=SAVES, save_file=mt_savefile+stat+'/', PLOT=True, REPEATED=10)
         #print(np.max(abs(gfs[0][:,:,2])))
         print('loaded gfs...')
         gfs_hat = []
@@ -182,7 +182,7 @@ def moment_general(pressure, depths, time, stationPos, stations, sourceParams, m
         dvel_z += np.fft.ifft(dmom_rate_hat * moment_tensor[2,2] * gfs_hat[5][:,:,0], axis=-1) / dt
         plt.pcolormesh(time, depths, np.real(dvel_z))
         plt.xlim(0, 150)
-        plt.ylim(300, 0)
+        plt.ylim(400, 0)
         plt.ylabel('depth (m)')
         plt.xlabel('time (s)')
         plt.title('d(vel_z)/dz')
@@ -199,7 +199,7 @@ def moment_general(pressure, depths, time, stationPos, stations, sourceParams, m
         dvel_r += np.fft.ifft(dmom_rate_hat * moment_tensor[2,2] * gfs_hat[5][:,:,1], axis=-1) / dt
         plt.pcolormesh(time, depths, np.real(dvel_r))
         plt.xlim(0, 150)
-        plt.ylim(300, 0)
+        plt.ylim(400, 0)
         plt.ylabel('depth (m)')
         plt.xlabel('time (s)')
         plt.title('d(vel_r)/dz')

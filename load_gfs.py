@@ -116,7 +116,7 @@ def load_gfs_PS(directory, srctype, time, INTERPOLATE_TIME=False, SAVE=False, sa
     return time, new_gfs
 
 def load_gfs_ES(directory, srctype, time, depths, INTERPOLATE_TIME=False, INTERPOLATE_SPACE=False, 
-                SAVE=False, save_file='gf', PLOT=False):
+                SAVE=False, save_file='gf', PLOT=False, REPEATED=0):
     '''
     loads in extended source Green's functions and can interpolate in time/space to get compatible
     array dimensions with desired time/depth array
@@ -172,9 +172,9 @@ def load_gfs_ES(directory, srctype, time, depths, INTERPOLATE_TIME=False, INTERP
     for com in components:
         gf = np.zeros((gf_hh, tt, 3))
         gf[:,:gf_tt] = sio.loadmat(directory+com)['out'][:]
-        for ii in range(7):
-            gf[-ii] = gf[-7]
-            print(gf_depths[-7])
+        for ii in range(REPEATED):
+            gf[-ii] = gf[-REPEATED]
+        print(gf_depths[-REPEATED])
         gfs.append(gf)
         gfs_hat.append(np.fft.fft(gf, axis=1) * gf_dt)
     gc.collect()
@@ -182,8 +182,8 @@ def load_gfs_ES(directory, srctype, time, depths, INTERPOLATE_TIME=False, INTERP
     if PLOT:
         #plt.pcolormesh(gf_omega, gf_depths, np.abs(gfs_hat[0][:,:,1]))
         plt.pcolormesh(time, gf_depths, np.real(gfs[0][:,:,1]))
-        plt.xlim(0, 40)
-        plt.ylim(300, 0)
+        plt.xlim(0, 100)
+        plt.ylim(400, 0)
         plt.ylabel('depth (m)')
         plt.xlabel('time (s)')
         plt.title('GFxx radial BEFORE')
@@ -244,8 +244,8 @@ def load_gfs_ES(directory, srctype, time, depths, INTERPOLATE_TIME=False, INTERP
     if PLOT:
         #plt.pcolormesh(desired_omega, depths, np.abs(new_gfs_hat[0][:,:,1]))
         plt.pcolormesh(time, depths, np.real(new_gfs[0][:,:,1]))
-        plt.xlim(0, 40)
-        plt.ylim(300, 0)
+        plt.xlim(0, 100)
+        plt.ylim(400, 0)
         plt.ylabel('depth (m)')
         plt.xlabel('time (s)')
         plt.title('GFxx radial AFTER')
