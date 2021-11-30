@@ -22,9 +22,9 @@ import source_plot as sp
 '''Input Section'''
 #SIMULATION = '60__RUPTURE__200s_128pts__CHAM_10e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
 SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
-SOURCE_TYPE = 'CONDUIT'  # CHAMBER or CONDUIT
-REPRESENTATION = 'ES'  # PS (point source) or ES (extended source; ONLY FOR CONDUIT)
-CONTRIBUTION = 'MOMENT'  # MOMENT, FORCE, or BOTH
+SOURCE_TYPE = 'CHAMBER'  # CHAMBER or CONDUIT
+REPRESENTATION = 'PS'  # PS (point source) or ES (extended source; ONLY FOR CONDUIT)
+CONTRIBUTION = 'FORCE'  # MOMENT, FORCE, or BOTH
 if SOURCE_TYPE == 'CHAMBER':
     MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_mt/'
     SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_sf/'
@@ -64,25 +64,25 @@ else:
 '''------------------------------------------------------------------------------------------'''
 '''receiver/seismometer specs'''
 # number of seismometers
-nn = 1
+nn = 4
 # seismometer distances from vent (m)
-rr = [30000]
-#rr = [1000, 3000, 10000, 30000]
+#rr = [30000]
+rr = [1000, 3000, 10000, 30000]
 
 '''
 spatial coordinate labels
 nn seismometers with (x,y,z) position
 fixing seismometers to x-z plane cutting through the source at origin (y = 0)
 '''
-labels = ['30km'] #, '30km']
-#labels = ['1km', '3km', '10km', '30km']
+#labels = ['30km'] #, '30km']
+labels = ['1km', '3km', '10km', '30km']
 # vector positions for each seismometer
-pos = np.array([[rr[0], 0, 0]]) #,
-#                [rr[1], 0, 0]])
-#pos = np.array([[rr[0], 0, 0],
-#                [rr[1], 0, 0],
-#                [rr[2], 0, 0],
-#                [rr[3], 0, 0]])
+#pos = np.array([[rr[0], 0, 0]]) #,
+##                [rr[1], 0, 0]])
+pos = np.array([[rr[0], 0, 0],
+                [rr[1], 0, 0],
+                [rr[2], 0, 0],
+                [rr[3], 0, 0]])
 
 '''------------------------------------------------------------------------------------------'''
 
@@ -115,7 +115,10 @@ vol = (3/4) * chamber_vol  # =np.pi * chamber_radius**3
 if SOURCE_TYPE == 'CONDUIT':
     sourceDim = A
 elif SOURCE_TYPE == 'CHAMBER':
-    sourceDim = vol
+    if CONTRIBUTION == 'MOMENT':
+        sourceDim = vol
+    if CONTRIBUTION == 'FORCE':
+        sourceDim = A
 sourcePos = np.array([0,0,-point])
 
 
