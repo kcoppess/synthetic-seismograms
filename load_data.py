@@ -3,6 +3,7 @@ import gc
 from zipfile import ZipFile
 import scipy.interpolate as si
 import io
+import matplotlib.pyplot as plt
 
 
 def moment_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME, dt):
@@ -25,19 +26,19 @@ def moment_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME, dt):
     directory = ZipFile(ZIPFILE, mode='r')
 
     if SOURCE_TYPE == 'CONDUIT':
-        p1 = np.loadtxt(io.BytesIO(directory.read('pressure.txt')), delimiter=',')
+        p1 = np.loadtxt(io.BytesIO(directory.read('pressure.txt')), delimiter=',')#[:,:358187]
         p1 = np.real(p1)
     elif SOURCE_TYPE == 'CHAMBER':
-        p1 = np.loadtxt(io.BytesIO(directory.read('chamber_pressure.txt')), delimiter=',')
+        p1 = np.loadtxt(io.BytesIO(directory.read('chamber_pressure.txt')), delimiter=',')#[:358187]
         p1 = np.real(p1)
 
-    time1 = np.loadtxt(io.BytesIO(directory.read('time.txt')), delimiter=',')
+    time1 = np.loadtxt(io.BytesIO(directory.read('time.txt')), delimiter=',')#[:358187]
     # in conduit flow code, this takes up to be positive z and
     # bottom of conduit is at z = 0
     height = np.loadtxt(io.BytesIO(directory.read('height.txt')), delimiter=',')
 
     directory.close()
-
+    
     '''signal processing to smooth out numerical effects (e.g. from downsampling)'''
     length = int(TOTAL_TIME / dt)
     time = np.arange(length) * dt
@@ -77,13 +78,13 @@ def force_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME, dt):
     directory = ZipFile(ZIPFILE, mode='r')
 
     if SOURCE_TYPE == 'CONDUIT':
-        f1 = np.loadtxt(io.BytesIO(directory.read('wall_trac.txt')), delimiter=',')
+        f1 = np.loadtxt(io.BytesIO(directory.read('wall_trac.txt')), delimiter=',')#[:,:358187]
         f1 = -np.real(f1)
     elif SOURCE_TYPE == 'CHAMBER':
-        f1 = np.loadtxt(io.BytesIO(directory.read('chamber_pressure.txt')), delimiter=',')
+        f1 = np.loadtxt(io.BytesIO(directory.read('chamber_pressure.txt')), delimiter=',')#[:358187]
         f1 = -np.real(f1)
 
-    time1 = np.loadtxt(io.BytesIO(directory.read('time.txt')), delimiter=',')
+    time1 = np.loadtxt(io.BytesIO(directory.read('time.txt')), delimiter=',')#[:358187]
     # in conduit flow code, this takes up to be positive z and
     # bottom of conduit is at z = 0
     height = np.loadtxt(io.BytesIO(directory.read('height.txt')), delimiter=',')

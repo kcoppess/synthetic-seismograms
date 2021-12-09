@@ -12,6 +12,7 @@ from zipfile import ZipFile
 import scipy.signal as sg
 import scipy.interpolate as si
 import scipy.integrate as sint
+import matplotlib.pyplot as plt
 
 import helpers as hp
 import source_setup as ss
@@ -200,7 +201,7 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
             dis_z = sint.cumtrapz(vel_z[0], x=time, initial=0)
             return dis_x, dis_y, dis_z, moment[0]
         else:
-            return vel_x, vel_y, vel_z, moment[0]
+            return vel_x[0], vel_y[0], vel_z[0], moment[0]
     else:
         if deriv == 'ACC':
             acc_r = np.gradient(vel_r[0], dt, axis=1)
@@ -213,7 +214,7 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
             dis_tr = sint.cumtrapz(vel_tr[0], x=time, initial=0)
             return dis_r, dis_z, dis_tr, moment[0]
         else:
-            return vel_r, vel_z, vel_tr, moment[0]
+            return vel_r[0], vel_z[0], vel_tr[0], moment[0]
 
 
 def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, sourceParams, mediumParams, 
@@ -330,7 +331,7 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
             dis_z = sint.cumtrapz(vel_z[0], x=time, initial=0)
             return dis_x, dis_y, dis_z, force[0]
         else:
-            return vel_x, vel_y, vel_z, force[0]
+            return vel_x[0], vel_y[0], vel_z[0], force[0]
     else:
         if deriv == 'ACC':
             acc_r = np.gradient(vel_r[0], dt, axis=1)
@@ -343,7 +344,7 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
             dis_tr = sint.cumtrapz(vel_tr[0], x=time, initial=0)
             return dis_r, dis_z, dis_tr, force[0]
         else:
-            return vel_r, vel_z, vel_tr, force[0]
+            return vel_r[0], vel_z[0], vel_tr[0], force[0]
 
 
 def moment_mixed_analytical(SOURCE_TYPE, pressure, height, dt, stationPos, sourceParams, mediumParams, wave_terms, ps_waves,

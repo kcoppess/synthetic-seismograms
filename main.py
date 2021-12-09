@@ -20,12 +20,16 @@ import source_setup as ss
 import source_plot as sp
 
 '''Input Section'''
-#SIMULATION = '60__RUPTURE__200s_128pts__CHAM_10e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
+#SIMULATION = '1500__RUPTURE__600s_79pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0747m__MAGMA_cVF80_n001'
+#SIMULATION = '60__RUPTURE__1000s_256pts__CHAM_1000e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001__'
+#SIMULATION = '150__RUPTURE__500s_128pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
 SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
-SOURCE_TYPE = 'CHAMBER'  # CHAMBER or CONDUIT
+SOURCE_TYPE = 'CONDUIT'  # CHAMBER or CONDUIT
 REPRESENTATION = 'PS'  # PS (point source) or ES (extended source; ONLY FOR CONDUIT)
 CONTRIBUTION = 'FORCE'  # MOMENT, FORCE, or BOTH
 if SOURCE_TYPE == 'CHAMBER':
+    #MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_mt/'
+    #SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_sf/'
     MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_mt/'
     SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_sf/'
 if SOURCE_TYPE == 'CONDUIT':
@@ -37,9 +41,9 @@ if SOURCE_TYPE == 'CONDUIT':
         SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_sf/'
 #MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/halfspace-greens/halfA_conduit/halfA_0.14062_mt/'
 #SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/halfspace-greens/halfA_conduit/halfA_0.14062_sf/'
-TOTAL_TIME = 1500 #2998  # in seconds
+TOTAL_TIME = 1500 #1000 #2998  # in seconds
 DT = 0.04 # in seconds (NB: must be same as sampling rate of GFs)
-SAVE = False
+SAVE = True
 PLOT = True
 DERIV = 'DIS'  # ACC, VEL, or DIS
 TIME_INPUT = ''  # MANUAL or anything else (anything other than MANUAL draws data from the file directory)
@@ -54,6 +58,7 @@ chamber_vol = 1e5  # m^3
 if SOURCE_TYPE == 'CONDUIT':
     point = 501.95  # m
 elif SOURCE_TYPE == 'CHAMBER':
+    #point = 1620.350  # m
     point = 1028.794  # m
 
 if REPRESENTATION == 'PS':
@@ -66,7 +71,7 @@ else:
 # number of seismometers
 nn = 4
 # seismometer distances from vent (m)
-#rr = [30000]
+#rr = [10000]
 rr = [1000, 3000, 10000, 30000]
 
 '''
@@ -74,7 +79,7 @@ spatial coordinate labels
 nn seismometers with (x,y,z) position
 fixing seismometers to x-z plane cutting through the source at origin (y = 0)
 '''
-#labels = ['30km'] #, '30km']
+#labels = ['10km'] #, '30km']
 labels = ['1km', '3km', '10km', '30km']
 # vector positions for each seismometer
 #pos = np.array([[rr[0], 0, 0]]) #,
@@ -125,7 +130,7 @@ sourcePos = np.array([0,0,-point])
 '''------------------------------------------------------------------------------------------'''
 '''loading data and setting up directories'''
 
-direc = '/Users/kcoppess/muspelheim/synthetic-seismograms/seismos/'+SIMULATION+'/'
+direc = '/Users/kcoppess/muspelheim/synthetic-seismograms/seismos/'+SIMULATION+'/velocity/'
 save_file = direc+SOURCE_TYPE+'__'+REPRESENTATION+'__'
 if not os.path.exists(direc):
     os.makedirs(direc)
@@ -142,12 +147,13 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
         time = MANUAL_TIME
     if REPRESENTATION == 'PS':
         r_mom, z_mom, tr_mom, moment = PS.moment_general(SOURCE_TYPE, p, height, time, pos, labels, 
-                                                [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, 
+                                                [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, deriv='VEL',
                                                 INTERPOLATE=True, SOURCE_FILTER=True)
     elif REPRESENTATION == 'ES':
         r_mom, z_mom, tr_mom, moment = ES.moment_general(p, np.flip(height), time, pos, labels, 
-                                                [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, 
+                                                [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, deriv='VEL',
                                                 INTERPOLATE=True, SOURCE_FILTER=True, SAVES=True, mt_savefile=MT_GF_FILE)
+
     gc.collect()
     if SAVE:
         np.savetxt(save_file+'MOMENT.gz', moment, delimiter=',')
@@ -162,8 +168,12 @@ if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
         time = MANUAL_TIME
     if REPRESENTATION == 'PS':
         r_for, z_for, tr_for, force = PS.force_general(SOURCE_TYPE, f, height, time, pos, labels, 
-                                                [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, 
+                                                [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, deriv='VEL',
                                                 INTERPOLATE=True, SOURCE_FILTER=True)
+    elif REPRESENTATION == 'ES':
+        r_for, z_for, tr_for, force = ES.force_general(f, np.flip(height), time, pos, labels, 
+                                                [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, deriv='VEL',
+                                                INTERPOLATE=True, SOURCE_FILTER=True, SAVES=True, sf_savefile=SF_GF_FILE)
     gc.collect()
     if SAVE:
         np.savetxt(save_file+'FORCE.gz', force, delimiter=',')
