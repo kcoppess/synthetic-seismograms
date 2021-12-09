@@ -26,7 +26,7 @@ import source_plot as sp
 SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
 SOURCE_TYPE = 'CONDUIT'  # CHAMBER or CONDUIT
 REPRESENTATION = 'PS'  # PS (point source) or ES (extended source; ONLY FOR CONDUIT)
-CONTRIBUTION = 'FORCE'  # MOMENT, FORCE, or BOTH
+CONTRIBUTION = 'MOMENT'  # MOMENT, FORCE, or BOTH
 if SOURCE_TYPE == 'CHAMBER':
     #MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_mt/'
     #SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_sf/'
@@ -45,7 +45,7 @@ TOTAL_TIME = 1500 #1000 #2998  # in seconds
 DT = 0.04 # in seconds (NB: must be same as sampling rate of GFs)
 SAVE = True
 PLOT = True
-DERIV = 'DIS'  # ACC, VEL, or DIS
+DERIV = 'VEL'  # ACC, VEL, or DIS
 TIME_INPUT = ''  # MANUAL or anything else (anything other than MANUAL draws data from the file directory)
 MOMENT_PRESSURE = [0, 1, 2]  # moment pressure time series for manual entry
 FORCE_PRESSURE = [0, 1, 2]  # force pressure time series for manual entry
@@ -147,11 +147,11 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
         time = MANUAL_TIME
     if REPRESENTATION == 'PS':
         r_mom, z_mom, tr_mom, moment = PS.moment_general(SOURCE_TYPE, p, height, time, pos, labels, 
-                                                [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, deriv='VEL',
+                                                [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, deriv=DERIV,
                                                 INTERPOLATE=True, SOURCE_FILTER=True)
     elif REPRESENTATION == 'ES':
         r_mom, z_mom, tr_mom, moment = ES.moment_general(p, np.flip(height), time, pos, labels, 
-                                                [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, deriv='VEL',
+                                                [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, deriv=DERIV,
                                                 INTERPOLATE=True, SOURCE_FILTER=True, SAVES=True, mt_savefile=MT_GF_FILE)
 
     gc.collect()
@@ -168,11 +168,11 @@ if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
         time = MANUAL_TIME
     if REPRESENTATION == 'PS':
         r_for, z_for, tr_for, force = PS.force_general(SOURCE_TYPE, f, height, time, pos, labels, 
-                                                [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, deriv='VEL',
+                                                [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, deriv=DERIV,
                                                 INTERPOLATE=True, SOURCE_FILTER=True)
     elif REPRESENTATION == 'ES':
         r_for, z_for, tr_for, force = ES.force_general(f, np.flip(height), time, pos, labels, 
-                                                [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, deriv='VEL',
+                                                [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, deriv=DERIV,
                                                 INTERPOLATE=True, SOURCE_FILTER=True, SAVES=True, sf_savefile=SF_GF_FILE)
     gc.collect()
     if SAVE:
