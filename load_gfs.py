@@ -163,7 +163,10 @@ def load_gfs_ES(directory, srctype, time, depths, INTERPOLATE_TIME=False, INTERP
     gf_time = sio.loadmat(directory+'time.mat')['out'][0]
     gf_tt = len(gf_time)
     tt = len(time)
-    gf_depths = sio.loadmat(directory+'depths.mat')['out'][:].astype(np.float)*1e3
+    if 'interpolated' in directory:
+        gf_depths = sio.loadmat(directory+'depths.mat')['out'][0].astype(np.float)
+    else:
+        gf_depths = sio.loadmat(directory+'depths.mat')['out'][:].astype(np.float)*1e3
     gf_hh = len(gf_depths)
     hh = len(depths)
     gf_dt = gf_time[1] - gf_time[0]
@@ -181,8 +184,8 @@ def load_gfs_ES(directory, srctype, time, depths, INTERPOLATE_TIME=False, INTERP
     if PLOT:
         #plt.pcolormesh(gf_omega, gf_depths, np.abs(gfs_hat[0][:,:,1]))
         plt.pcolormesh(time, gf_depths, np.real(gfs[0][:,:,1]))
-        plt.xlim(0, 100)
-        plt.ylim(400, 0)
+        plt.xlim(0, 10)
+        plt.ylim(1000, 0)
         plt.ylabel('depth (m)')
         plt.xlabel('time (s)')
         plt.title('GFxx radial BEFORE')
@@ -236,15 +239,15 @@ def load_gfs_ES(directory, srctype, time, depths, INTERPOLATE_TIME=False, INTERP
     
     if SAVE:
         for func, lab in zip(new_gfs, components):
-            sio.savemat(save_file+'interpolated_depths.mat', mdict = {'out' : depths})
-            sio.savemat(save_file+'interpolated_time.mat', mdict = {'out' : time})
-            sio.savemat(save_file+'interpolated_'+lab, mdict = {'out' : func})
+            sio.savemat(save_file+str(len(depths))+'_interpolated_depths.mat', mdict = {'out' : depths})
+            sio.savemat(save_file+str(len(depths))+'_interpolated_time.mat', mdict = {'out' : time})
+            sio.savemat(save_file+str(len(depths))+'_interpolated_'+lab, mdict = {'out' : func})
 
     if PLOT:
         #plt.pcolormesh(desired_omega, depths, np.abs(new_gfs_hat[0][:,:,1]))
         plt.pcolormesh(time, depths, np.real(new_gfs[0][:,:,1]))
-        plt.xlim(0, 100)
-        plt.ylim(400, 0)
+        plt.xlim(0, 10)
+        plt.ylim(1000, 0)
         plt.ylabel('depth (m)')
         plt.xlabel('time (s)')
         plt.title('GFxx radial AFTER')

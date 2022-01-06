@@ -161,8 +161,8 @@ def moment_general(pressure, depths, time, stationPos, stations, sourceParams, m
     #dvel_r = np.zeros((NN, HH, TT), dtype='complex')
     #dvel_tr = np.zeros((NN, HH, TT), dtype='complex')
     
-    repeated_depth = [10, 15, 16, 16]
-    #repeated_depth = [16, 16]
+    #repeated_depth = [10, 15, 16, 16]
+    repeated_depth = [0, 0, 0, 0]
 
     vel_z = np.zeros((NN, TT), dtype='complex')
     vel_r = np.zeros((NN, TT), dtype='complex')
@@ -380,8 +380,8 @@ def force_general(force, depths, time, stationPos, stations, sourceParams, mediu
         print('fourier transformed gfs...')
         dvel_z = np.fft.ifft(dfor_rate_hat * gfs_hat[1][:,:,0], axis=-1)[:,SHIFT:] / dt
         #plt.pcolormesh(time, depths, np.real(dvel_z))
-        #plt.xlim(0, 150)
-        #plt.ylim(400, 0)
+        #plt.xlim(0, 1000)
+        #plt.ylim(1000, 0)
         #plt.ylabel('depth (m)')
         #plt.xlabel('time (s)')
         #plt.title('d(vel_z)/dz')
@@ -392,8 +392,8 @@ def force_general(force, depths, time, stationPos, stations, sourceParams, mediu
 
         dvel_r = np.fft.ifft(dfor_rate_hat * gfs_hat[1][:,:,1], axis=-1)[:,SHIFT:] / dt
         #plt.pcolormesh(time, depths, np.real(dvel_r))
-        #plt.xlim(0, 150)
-        #plt.ylim(400, 0)
+        #plt.xlim(0, 1000)
+        #plt.ylim(1000, 0)
         #plt.ylabel('depth (m)')
         #plt.xlabel('time (s)')
         #plt.title('d(vel_r)/dz')
