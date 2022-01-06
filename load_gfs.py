@@ -174,7 +174,6 @@ def load_gfs_ES(directory, srctype, time, depths, INTERPOLATE_TIME=False, INTERP
         gf[:,:gf_tt] = sio.loadmat(directory+com)['out'][:]
         for ii in range(REPEATED):
             gf[-ii] = gf[-REPEATED]
-        print(gf_depths[-REPEATED])
         gfs.append(gf)
         gfs_hat.append(np.fft.fft(gf, axis=1) * gf_dt)
     gc.collect()
