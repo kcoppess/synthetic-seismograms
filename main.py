@@ -24,9 +24,9 @@ import source_plot as sp
 #SIMULATION = '60__RUPTURE__1000s_256pts__CHAM_1000e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001__'
 #SIMULATION = '150__RUPTURE__500s_128pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
 SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
-SOURCE_TYPE = 'CHAMBER'  # CHAMBER or CONDUIT
-REPRESENTATION = 'PS'  # PS (point source) or ES (extended source; ONLY FOR CONDUIT)
-CONTRIBUTION = 'MOMENT'  # MOMENT, FORCE, or BOTH
+SOURCE_TYPE = 'CONDUIT'  # CHAMBER or CONDUIT
+REPRESENTATION = 'ES'  # PS (point source) or ES (extended source; ONLY FOR CONDUIT)
+CONTRIBUTION = 'FORCE'  # MOMENT, FORCE, or BOTH
 if SOURCE_TYPE == 'CHAMBER':
     #MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_mt/'
     #SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_sf/'
@@ -41,9 +41,9 @@ if SOURCE_TYPE == 'CONDUIT':
         SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_sf/'
 #MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/halfspace-greens/halfA_conduit/halfA_0.14062_mt/'
 #SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/halfspace-greens/halfA_conduit/halfA_0.14062_sf/'
-TOTAL_TIME = 1500 #1000 #2998  # in seconds
+TOTAL_TIME = 1000 #1500 #2998  # in seconds
 DT = 0.04 # in seconds (NB: must be same as sampling rate of GFs)
-SAVE = False
+SAVE = True
 PLOT = True
 DERIV = 'VEL'  # ACC, VEL, or DIS
 TIME_INPUT = ''  # MANUAL or anything else (anything other than MANUAL draws data from the file directory)
@@ -51,7 +51,7 @@ MOMENT_PRESSURE = [0, 1, 2]  # moment pressure time series for manual entry
 FORCE_PRESSURE = [0, 1, 2]  # force pressure time series for manual entry
 MANUAL_TIME = [0, 1, 2]  # time for time series for manual entry
 
-direc_base = '/Users/kcoppess/muspelheim/synthetic-seismograms/seismos/'+SIMULATION
+direc_base = '/Users/kcoppess/muspelheim/synthetic-seismograms/seismos/diff-transitions/'+SIMULATION
 if DERIV == 'DIS':
     direc = direc_base+'/displacement/'
 elif DERIV == 'VEL':
@@ -220,7 +220,7 @@ if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
     gc.collect()
 
 
-print(SOURCE_TYPE+' '+CONTRIBUTION)
+print(SOURCE_TYPE+' '+CONTRIBUTION+' '+REPRESENTATION+' '+DERIV)
 
 #if PLOT:
 #    if CONTRIBUTION == 'FORCE':

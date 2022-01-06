@@ -124,8 +124,10 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
     normal_cutoff = cutoff_freq / nyq_freq
     b, a = sg.butter(3, normal_cutoff, btype='low', analog=False)
 
+    SHIFT = 4000
+
     if SOURCE_TYPE == 'CONDUIT':
-        dmoment_dz = ss.moment_density(pressure, sourceDim, cushion=0)
+        dmoment_dz = ss.moment_density(pressure, sourceDim, cushion=SHIFT)
         if SOURCE_FILTER:
             filt = sg.lfilter(b, a, dmoment_dz)
         else:
@@ -133,7 +135,7 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
         moment = hp.integration_trapezoid(depths, np.array([filt]))
         moment_tensor = ss.moment_tensor_cylindricalSource([lame, mu])
     elif SOURCE_TYPE == 'CHAMBER':
-        moment_unfil = ss.moment_density(np.array([pressure]), sourceDim, cushion=0)[0]
+        moment_unfil = ss.moment_density(np.array([pressure]), sourceDim, cushion=SHIFT)[0]
         if SOURCE_FILTER:
             moment = [sg.lfilter(b, a, moment_unfil)]
         else:
@@ -144,9 +146,10 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
     moment_rate = np.gradient(moment, dt, axis=-1)
     gc.collect()
 
-    TT = np.ma.size(moment, axis=1)  # number of time points
+    TT = np.ma.size(moment, axis=1)-SHIFT  # number of time points
     NN = np.ma.size(stationPos, axis=0)  # number of receivers
-
+    
+    GFtime = np.arange(TT+SHIFT) * dt
     mom_rate_hat = np.fft.fft(moment_rate, axis=1) * dt
 
     vel_z = np.zeros((1, NN, TT), dtype='complex')
@@ -155,34 +158,34 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
 
 
     for stat, ii in zip(stations, np.arange(NN)):
-        gf_time, gfs = gf.load_gfs_PS(mt_gf_file+stat+'/', 0, time, INTERPOLATE_TIME=INTERPOLATE, SAVE=SAVES, 
+        gf_time, gfs = gf.load_gfs_PS(mt_gf_file+stat+'/', 0, GFtime, INTERPOLATE_TIME=INTERPOLATE, SAVE=SAVES, 
                                     save_file=mt_savefile, PLOT=False)
         gfs_hat = []
         for gg in gfs:
             gf_hat = np.fft.fft(gg, axis=0) * dt
             gfs_hat.append(gf_hat)
-        vel_z[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,0] * gfs_hat[0][:,0], axis=-1) / dt
-        vel_z[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,1] * gfs_hat[1][:,0], axis=-1) / dt
-        vel_z[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,2] * gfs_hat[2][:,0], axis=-1) / dt
-        vel_z[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[1,1] * gfs_hat[3][:,0], axis=-1) / dt
-        vel_z[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[1,2] * gfs_hat[4][:,0], axis=-1) / dt
-        vel_z[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[2,2] * gfs_hat[5][:,0], axis=-1) / dt
+        vel_z[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,0] * gfs_hat[0][:,0], axis=-1)[SHIFT:] / dt
+        vel_z[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,1] * gfs_hat[1][:,0], axis=-1)[SHIFT:] / dt
+        vel_z[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,2] * gfs_hat[2][:,0], axis=-1)[SHIFT:] / dt
+        vel_z[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[1,1] * gfs_hat[3][:,0], axis=-1)[SHIFT:] / dt
+        vel_z[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[1,2] * gfs_hat[4][:,0], axis=-1)[SHIFT:] / dt
+        vel_z[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[2,2] * gfs_hat[5][:,0], axis=-1)[SHIFT:] / dt
         gc.collect()
 
-        vel_r[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,0] * gfs_hat[0][:,1], axis=-1) / dt
-        vel_r[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,1] * gfs_hat[1][:,1], axis=-1) / dt
-        vel_r[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,2] * gfs_hat[2][:,1], axis=-1) / dt
-        vel_r[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[1,1] * gfs_hat[3][:,1], axis=-1) / dt
-        vel_r[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[1,2] * gfs_hat[4][:,1], axis=-1) / dt
-        vel_r[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[2,2] * gfs_hat[5][:,1], axis=-1) / dt
+        vel_r[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,0] * gfs_hat[0][:,1], axis=-1)[SHIFT:] / dt
+        vel_r[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,1] * gfs_hat[1][:,1], axis=-1)[SHIFT:] / dt
+        vel_r[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,2] * gfs_hat[2][:,1], axis=-1)[SHIFT:] / dt
+        vel_r[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[1,1] * gfs_hat[3][:,1], axis=-1)[SHIFT:] / dt
+        vel_r[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[1,2] * gfs_hat[4][:,1], axis=-1)[SHIFT:] / dt
+        vel_r[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[2,2] * gfs_hat[5][:,1], axis=-1)[SHIFT:] / dt
         gc.collect()
 
-        vel_tr[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,0] * gfs_hat[0][:,2], axis=-1) / dt
-        vel_tr[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,1] * gfs_hat[1][:,2], axis=-1) / dt
-        vel_tr[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,2] * gfs_hat[2][:,2], axis=-1) / dt
-        vel_tr[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[1,1] * gfs_hat[3][:,2], axis=-1) / dt
-        vel_tr[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[1,2] * gfs_hat[4][:,2], axis=-1) / dt
-        vel_tr[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[2,2] * gfs_hat[5][:,2], axis=-1) / dt
+        vel_tr[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,0] * gfs_hat[0][:,2], axis=-1)[SHIFT:] / dt
+        vel_tr[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,1] * gfs_hat[1][:,2], axis=-1)[SHIFT:] / dt
+        vel_tr[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[0,2] * gfs_hat[2][:,2], axis=-1)[SHIFT:] / dt
+        vel_tr[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[1,1] * gfs_hat[3][:,2], axis=-1)[SHIFT:] / dt
+        vel_tr[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[1,2] * gfs_hat[4][:,2], axis=-1)[SHIFT:] / dt
+        vel_tr[0, ii] += np.fft.ifft(mom_rate_hat[0] * moment_tensor[2,2] * gfs_hat[5][:,2], axis=-1)[SHIFT:] / dt
 
     vel_z = np.real(vel_z)
     vel_r = np.real(vel_r)
@@ -275,15 +278,17 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
     normal_cutoff = cutoff_freq / nyq_freq
     b, a = sg.butter(3, normal_cutoff, btype='low', analog=False)
 
+    SHIFT = 4000
+
     if SOURCE_TYPE == 'CONDUIT':
-        dforce_dz = ss.moment_density(force, sourceDim, cushion=0)
+        dforce_dz = ss.moment_density(force, sourceDim, cushion=SHIFT)
         if SOURCE_FILTER:
             filt = sg.lfilter(b, a, dforce_dz)
         else:
             filt = dforce_dz
         force = hp.integration_trapezoid(depths, np.array([filt]))
     elif SOURCE_TYPE == 'CHAMBER':
-        force_unfil = ss.moment_density(np.array([force]), sourceDim, cushion=0)[0]
+        force_unfil = ss.moment_density(np.array([force]), sourceDim, cushion=SHIFT)[0]
         if SOURCE_FILTER:
             force = np.array([sg.lfilter(b, a, force_unfil)])
         else:
@@ -293,9 +298,10 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
     force_rate = np.gradient(force, dt, axis=-1)
     gc.collect()
 
-    TT = np.ma.size(force, axis=1)  # number of time points
+    TT = np.ma.size(force, axis=1)-SHIFT  # number of time points
     NN = np.ma.size(stationPos, axis=0)  # number of receivers
-
+    
+    GFtime = np.arange(TT+SHIFT) * dt
     for_rate_hat = np.fft.fft(force_rate, axis=1) * dt
 
     vel_z = np.zeros((1, NN, TT), dtype='complex')
@@ -303,15 +309,15 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
     vel_tr = np.zeros((1, NN, TT), dtype='complex')
 
     for stat, ii in zip(stations, np.arange(NN)):
-        gf_time, gfs = gf.load_gfs_PS(sf_gf_file+stat+'/', 1, time, INTERPOLATE_TIME=INTERPOLATE, SAVE=SAVES, 
+        gf_time, gfs = gf.load_gfs_PS(sf_gf_file+stat+'/', 1, GFtime, INTERPOLATE_TIME=INTERPOLATE, SAVE=SAVES, 
                                         save_file=sf_savefile, PLOT=False)
         gfs_hat = []
         for gg in gfs:
             gf_hat = np.fft.fft(gg, axis=0) * dt
             gfs_hat.append(gf_hat)
-        vel_z[0, ii] += np.fft.ifft(for_rate_hat[0] * gfs_hat[1][:,0], axis=-1) / dt
-        vel_r[0, ii] += np.fft.ifft(for_rate_hat[0] * gfs_hat[1][:,1], axis=-1) / dt
-        vel_tr[0, ii] += np.fft.ifft(for_rate_hat[0] * gfs_hat[1][:,2], axis=-1) / dt
+        vel_z[0, ii] += np.fft.ifft(for_rate_hat[0] * gfs_hat[1][:,0], axis=-1)[SHIFT:] / dt
+        vel_r[0, ii] += np.fft.ifft(for_rate_hat[0] * gfs_hat[1][:,1], axis=-1)[SHIFT:] / dt
+        vel_tr[0, ii] += np.fft.ifft(for_rate_hat[0] * gfs_hat[1][:,2], axis=-1)[SHIFT:] / dt
         gc.collect()
 
     vel_z = np.real(vel_z)
