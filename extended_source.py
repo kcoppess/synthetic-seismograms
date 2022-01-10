@@ -346,6 +346,14 @@ def force_general(force, depths, time, stationPos, stations, sourceParams, mediu
     
     # NB: Zhu GF for downward impulse
     dforce_rate = np.gradient(dforce_dz, dt, axis=-1)
+    #plt.pcolormesh(time, depths, dforce_dz[:,SHIFT:])
+    #plt.xlim(0, 1000)
+    #plt.ylim(1000, 0)
+    #plt.ylabel('depth (m)')
+    #plt.xlabel('time (s)')
+    #plt.title('dforce_rate')
+    #plt.colorbar()
+    #plt.show()
     gc.collect()
 
     TT = np.ma.size(dforce_dz, axis=1)-SHIFT  # number of time points

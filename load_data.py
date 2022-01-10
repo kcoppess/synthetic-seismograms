@@ -25,32 +25,36 @@ def moment_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME, dt):
     """
     directory = ZipFile(ZIPFILE, mode='r')
 
-    if SOURCE_TYPE == 'CONDUIT':
-        p1 = np.loadtxt(io.BytesIO(directory.read('pressure.txt')), delimiter=',')#[:,:358187]
-        p1 = np.real(p1)
-    elif SOURCE_TYPE == 'CHAMBER':
-        p1 = np.loadtxt(io.BytesIO(directory.read('chamber_pressure.txt')), delimiter=',')#[:358187]
-        p1 = np.real(p1)
-
-    time1 = np.loadtxt(io.BytesIO(directory.read('time.txt')), delimiter=',')#[:358187]
+    time2 = np.loadtxt(io.BytesIO(directory.read('time.txt')), delimiter=',')
+    t_index = np.argwhere(time2 > TOTAL_TIME-0.001)[0,0]
+    time1 = time2[:t_index]
     # in conduit flow code, this takes up to be positive z and
     # bottom of conduit is at z = 0
     height = np.loadtxt(io.BytesIO(directory.read('height.txt')), delimiter=',')
 
+    if SOURCE_TYPE == 'CONDUIT':
+        p1 = np.loadtxt(io.BytesIO(directory.read('pressure.txt')), delimiter=',')[:,:t_index]
+        p1 = np.real(p1)
+    elif SOURCE_TYPE == 'CHAMBER':
+        p1 = np.loadtxt(io.BytesIO(directory.read('chamber_pressure.txt')), delimiter=',')[:t_index]
+        p1 = np.real(p1)
+
     directory.close()
-    
+    gc.collect()
+
+    modulo = 2
     '''signal processing to smooth out numerical effects (e.g. from downsampling)'''
     length = int(TOTAL_TIME / dt)
     time = np.arange(length) * dt
 
-    time_smooth = si.interp1d(np.arange(len(time1))[::2], time1[::2], kind='cubic')
-    times = time_smooth(np.arange(len(time1))[:-2])
+    time_smooth = si.interp1d(np.arange(len(time1))[::modulo], time1[::modulo], kind='cubic')
+    times = time_smooth(np.arange(len(time1))[:-modulo])
 
     if SOURCE_TYPE == 'CONDUIT':
-        smooth = si.interp1d(times, p1[:, :-2], kind='cubic', axis=1)
+        smooth = si.interp1d(times, p1[:, :-modulo], kind='cubic', axis=1)
         p = smooth(time)
     elif SOURCE_TYPE == 'CHAMBER':
-        smooth = si.interp1d(times, p1[:-2], kind='cubic')
+        smooth = si.interp1d(times, p1[:-modulo], kind='cubic')
         p = smooth(time)
 
     gc.collect()
@@ -77,32 +81,36 @@ def force_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME, dt):
     """
     directory = ZipFile(ZIPFILE, mode='r')
 
-    if SOURCE_TYPE == 'CONDUIT':
-        f1 = np.loadtxt(io.BytesIO(directory.read('wall_trac.txt')), delimiter=',')#[:,:358187]
-        f1 = -np.real(f1)
-    elif SOURCE_TYPE == 'CHAMBER':
-        f1 = np.loadtxt(io.BytesIO(directory.read('chamber_pressure.txt')), delimiter=',')#[:358187]
-        f1 = -np.real(f1)
-
-    time1 = np.loadtxt(io.BytesIO(directory.read('time.txt')), delimiter=',')#[:358187]
+    time2 = np.loadtxt(io.BytesIO(directory.read('time.txt')), delimiter=',')
+    t_index = np.argwhere(time2 > TOTAL_TIME-0.001)[0,0]
+    time1 = time2[:t_index]
     # in conduit flow code, this takes up to be positive z and
     # bottom of conduit is at z = 0
     height = np.loadtxt(io.BytesIO(directory.read('height.txt')), delimiter=',')
 
-    directory.close()
+    if SOURCE_TYPE == 'CONDUIT':
+        f1 = np.loadtxt(io.BytesIO(directory.read('wall_trac.txt')), delimiter=',')[:,:t_index]
+        f1 = -np.real(f1)
+    elif SOURCE_TYPE == 'CHAMBER':
+        f1 = np.loadtxt(io.BytesIO(directory.read('chamber_pressure.txt')), delimiter=',')[:t_index]
+        f1 = -np.real(f1)
 
+    directory.close()
+    gc.collect()
+    
+    modulo = 2
     '''signal processing to smooth out numerical effects (e.g. from downsampling)'''
     length = int(TOTAL_TIME / dt)
     time = np.arange(length) * dt
 
-    time_smooth = si.interp1d(np.arange(len(time1))[::2], time1[::2], kind='cubic')
-    times = time_smooth(np.arange(len(time1))[:-2])
+    time_smooth = si.interp1d(np.arange(len(time1))[::modulo], time1[::modulo], kind='cubic')
+    times = time_smooth(np.arange(len(time1))[:-modulo])
 
     if SOURCE_TYPE == 'CONDUIT':
-        smooth = si.interp1d(times, f1[:, :-2], kind='cubic', axis=1)
+        smooth = si.interp1d(times, f1[:, :-modulo], kind='cubic', axis=1)
         f = smooth(time)
     elif SOURCE_TYPE == 'CHAMBER':
-        smooth = si.interp1d(times, f1[:-2], kind='cubic')
+        smooth = si.interp1d(times, f1[:-modulo], kind='cubic')
         f = smooth(time)
 
     gc.collect()

@@ -8,6 +8,8 @@ kate_local_example.py
 static_offset_Zhu.txt
 station_dist.py
 *interpolated*
+.ipynb_checkpoints/
+troubleshooting.ipynb
 
 # Node artifact files
 node_modules/
