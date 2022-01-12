@@ -24,9 +24,9 @@ import source_plot as sp
 #SIMULATION = '60__RUPTURE__1000s_256pts__CHAM_1000e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001__'
 #SIMULATION = '150__RUPTURE__500s_128pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
 #SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
-SIMULATION = '80__RUPTURE__1000s_256pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
-SOURCE_TYPE = 'CONDUIT'  # CHAMBER or CONDUIT
-REPRESENTATION = 'ES'  # PS (point source) or ES (extended source; ONLY FOR CONDUIT)
+SIMULATION = '40__RUPTURE__1000s_256pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
+SOURCE_TYPE = 'CHAMBER'  # CHAMBER or CONDUIT
+REPRESENTATION = 'PS'  # PS (point source) or ES (extended source; ONLY FOR CONDUIT)
 CONTRIBUTION = 'FORCE'  # MOMENT, FORCE, or BOTH
 if SOURCE_TYPE == 'CHAMBER':
     #MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_mt/'

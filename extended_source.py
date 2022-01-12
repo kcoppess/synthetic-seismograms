@@ -242,6 +242,7 @@ def moment_general(pressure, depths, time, stationPos, stations, sourceParams, m
     vel_z = np.real(vel_z)
     vel_r = np.real(vel_r)
     vel_tr = np.real(vel_tr)
+    moment = np.real(moment[:,SHIFT:])
 
     if coord == 'CARTESIAN':
         vel_x, vel_y = cartesian(vel_r, stationPos_cyl)
@@ -433,6 +434,7 @@ def force_general(force, depths, time, stationPos, stations, sourceParams, mediu
     vel_z = np.real(vel_z)
     vel_r = np.real(vel_r)
     vel_tr = np.real(vel_tr)
+    force = np.real(force[:,SHIFT:])
 
     if coord == 'CARTESIAN':
         vel_x, vel_y = cartesian(vel_r, stationPos_cyl)
