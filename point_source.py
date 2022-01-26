@@ -190,7 +190,7 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
     vel_z = np.real(vel_z)
     vel_r = np.real(vel_r)
     vel_tr = np.real(vel_tr)
-    moment = np.real(moment[:,SHIFT])
+    moment = np.real(moment[:,SHIFT:])
 
     if coord == 'CARTESIAN':
         vel_x, vel_y = cartesian(vel_r, stationPos_cyl)
@@ -295,7 +295,7 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
         else:
             force = np.array([force_unfil])
     gc.collect()
-    
+
     force_rate = np.gradient(force, dt, axis=-1)
     gc.collect()
 
@@ -324,7 +324,7 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
     vel_z = np.real(vel_z)
     vel_r = np.real(vel_r)
     vel_tr = np.real(vel_tr)
-    force = np.real(force[:,SHIFT])
+    force = np.real(force[:,SHIFT:])
 
     if coord == 'CARTESIAN':
         vel_x, vel_y = cartesian(vel_r, stationPos_cyl)
