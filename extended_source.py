@@ -123,7 +123,7 @@ def moment_general(pressure, depths, time, stationPos, stations, sourceParams, m
     b, a = sg.butter(3, normal_cutoff, btype='low', analog=False)
 
     shift = 15000
-    SHIFT = 4000
+    SHIFT = 5000
     dmoment_dz = ss.moment_density(pressure, sourceDim, cushion=shift+SHIFT)
     if SOURCE_FILTER:
         filt = sg.lfilter(b, a, dmoment_dz)[:,shift:]
@@ -335,7 +335,7 @@ def force_general(force, depths, time, stationPos, stations, sourceParams, mediu
     b, a = sg.butter(3, normal_cutoff, btype='low', analog=False)
 
     shift = 15000
-    SHIFT = 4000
+    SHIFT = 5000
     dforce_dz = ss.moment_density(force, sourceDim, cushion=shift+SHIFT)
     if SOURCE_FILTER:
         filt = sg.lfilter(b, a, dforce_dz)[:,shift:]

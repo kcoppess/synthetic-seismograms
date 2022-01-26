@@ -20,14 +20,14 @@ import source_setup as ss
 import source_plot as sp
 
 '''Input Section'''
-#SIMULATION = '1500__RUPTURE__600s_79pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0747m__MAGMA_cVF80_n001'
+SIMULATION = '1500__RUPTURE__600s_79pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0747m__MAGMA_cVF80_n001'
 #SIMULATION = '60__RUPTURE__1000s_256pts__CHAM_1000e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001__'
 #SIMULATION = '150__RUPTURE__500s_128pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
-SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
+#SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
 #SIMULATION = '40__RUPTURE__1000s_256pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
-SOURCE_TYPE = 'CHAMBER'  # CHAMBER or CONDUIT
+SOURCE_TYPE = 'CONDUIT'  # CHAMBER or CONDUIT
 REPRESENTATION = 'PS'  # PS (point source) or ES (extended source; ONLY FOR CONDUIT)
-CONTRIBUTION = 'FORCE'  # MOMENT, FORCE, or BOTH
+CONTRIBUTION = 'MOMENT'  # MOMENT, FORCE, or BOTH
 if SOURCE_TYPE == 'CHAMBER':
     #MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_mt/'
     #SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_sf/'
@@ -40,11 +40,9 @@ if SOURCE_TYPE == 'CONDUIT':
     elif REPRESENTATION == 'ES':
         MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_mt/1025_interpolated/'
         SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_sf/1025_interpolated/'
-#MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/halfspace-greens/halfA_conduit/halfA_0.14062_mt/'
-#SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/halfspace-greens/halfA_conduit/halfA_0.14062_sf/'
-TOTAL_TIME = 1000 #1500 #2998  # in seconds
+TOTAL_TIME = 600 #1000 #1500 #2998  # in seconds
 DT = 0.04 # in seconds (NB: must be same as sampling rate of GFs)
-SAVE = False
+SAVE = True
 PLOT = True
 DERIV = 'VEL'  # ACC, VEL, or DIS
 TIME_INPUT = ''  # MANUAL or anything else (anything other than MANUAL draws data from the file directory)
@@ -157,7 +155,7 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
     elif REPRESENTATION == 'ES':
         r_mom, z_mom, tr_mom, moment = ES.moment_general(p, np.flip(height), time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, deriv=DERIV,
-                                                INTERPOLATE=True, SOURCE_FILTER=True, SAVES=False, mt_savefile=MT_GF_FILE)
+                                                INTERPOLATE=True, SOURCE_FILTER=False, SAVES=False, mt_savefile=MT_GF_FILE)
 
     gc.collect()
     if SAVE:
@@ -174,11 +172,11 @@ if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
     if REPRESENTATION == 'PS':
         r_for, z_for, tr_for, force = PS.force_general(SOURCE_TYPE, f, height, time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, deriv=DERIV,
-                                                INTERPOLATE=True, SOURCE_FILTER=True)
+                                                INTERPOLATE=True, SOURCE_FILTER=False)
     elif REPRESENTATION == 'ES':
         r_for, z_for, tr_for, force = ES.force_general(f, np.flip(height), time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, deriv=DERIV,
-                                                INTERPOLATE=True, SOURCE_FILTER=True, SAVES=False, sf_savefile=SF_GF_FILE)
+                                                INTERPOLATE=True, SOURCE_FILTER=False, SAVES=False, sf_savefile=SF_GF_FILE)
     gc.collect()
     if SAVE:
         np.savetxt(save_file+'FORCE.gz', force, delimiter=',')

@@ -124,7 +124,7 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
     normal_cutoff = cutoff_freq / nyq_freq
     b, a = sg.butter(3, normal_cutoff, btype='low', analog=False)
 
-    SHIFT = 4000
+    SHIFT = 5000
 
     if SOURCE_TYPE == 'CONDUIT':
         dmoment_dz = ss.moment_density(pressure, sourceDim, cushion=SHIFT)
@@ -137,9 +137,9 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
     elif SOURCE_TYPE == 'CHAMBER':
         moment_unfil = ss.moment_density(np.array([pressure]), sourceDim, cushion=SHIFT)[0]
         if SOURCE_FILTER:
-            moment = [sg.lfilter(b, a, moment_unfil)]
+            moment = np.array([sg.lfilter(b, a, moment_unfil)])
         else:
-            moment = [moment_unfil]
+            moment = np.array([moment_unfil])
         moment_tensor = np.eye(3) * ((lame + 2 * mu) / mu)
     gc.collect()
 
@@ -279,7 +279,7 @@ def force_general(SOURCE_TYPE, force, depths, time, stationPos, stations, source
     normal_cutoff = cutoff_freq / nyq_freq
     b, a = sg.butter(3, normal_cutoff, btype='low', analog=False)
 
-    SHIFT = 4000
+    SHIFT = 5000
 
     if SOURCE_TYPE == 'CONDUIT':
         dforce_dz = ss.moment_density(force, sourceDim, cushion=SHIFT)
