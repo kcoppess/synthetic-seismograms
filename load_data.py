@@ -94,7 +94,7 @@ def force_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME, dt):
         f1 = -np.real(f1)
     elif SOURCE_TYPE == 'CHAMBER':
         f1a = np.loadtxt(io.BytesIO(directory.read('chamber_pressure.txt')), delimiter=',')[:t_index]
-        rho = np.loadtxt(io.BytesIO(directory.read('density.txt')), delimiter=',')[0,:index]
+        rho = np.loadtxt(io.BytesIO(directory.read('density.txt')), delimiter=',')[0,:t_index]
         df1b_dt = np.loadtxt(io.BytesIO(directory.read('velocity.txt')), delimiter=',')[0,:t_index] * rho * 9.8
         f1a = -np.real(f1a)
         df1b_dt = -np.real(df1b_dt)
