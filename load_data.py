@@ -2,6 +2,7 @@ import numpy as np
 import gc
 from zipfile import ZipFile
 import scipy.interpolate as si
+import scipy.integrate as sint
 import io
 import matplotlib.pyplot as plt
 
@@ -82,7 +83,7 @@ def force_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME, dt):
     directory = ZipFile(ZIPFILE, mode='r')
 
     time2 = np.loadtxt(io.BytesIO(directory.read('time.txt')), delimiter=',')
-    t_index = np.argwhere(time2 > TOTAL_TIME-0.001)[0,0]
+    t_index = np.argwhere(time2 > TOTAL_TIME-0.000001)[0,0]
     time1 = time2[:t_index]
     # in conduit flow code, this takes up to be positive z and
     # bottom of conduit is at z = 0
@@ -92,8 +93,11 @@ def force_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME, dt):
         f1 = np.loadtxt(io.BytesIO(directory.read('wall_trac.txt')), delimiter=',')[:,:t_index]
         f1 = -np.real(f1)
     elif SOURCE_TYPE == 'CHAMBER':
-        f1 = np.loadtxt(io.BytesIO(directory.read('chamber_pressure.txt')), delimiter=',')[:t_index]
-        f1 = -np.real(f1)
+        f1a = np.loadtxt(io.BytesIO(directory.read('chamber_pressure.txt')), delimiter=',')[:t_index]
+        rho = np.loadtxt(io.BytesIO(directory.read('density.txt')), delimiter=',')[0,:index]
+        df1b_dt = np.loadtxt(io.BytesIO(directory.read('velocity.txt')), delimiter=',')[0,:t_index] * rho * 9.8
+        f1a = -np.real(f1a)
+        df1b_dt = -np.real(df1b_dt)
 
     directory.close()
     gc.collect()
@@ -110,8 +114,13 @@ def force_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME, dt):
         smooth = si.interp1d(times, f1[:, :-modulo], kind='cubic', axis=1)
         f = smooth(time)
     elif SOURCE_TYPE == 'CHAMBER':
-        smooth = si.interp1d(times, f1[:-modulo], kind='cubic')
-        f = smooth(time)
+        smooth_a = si.interp1d(times, f1a[:-modulo], kind='cubic')
+        fa = smooth_a(time)
+        smooth_b = si.interp1d(times, df1b_dt[:-modulo], kind='cubic')
+        dfb_dt = smooth_b(time)
+
+        fb = sint.cumtrapz(dfb_dt, x=time, initial=0)
+        f = fa + fb
 
     gc.collect()
 
