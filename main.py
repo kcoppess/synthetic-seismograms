@@ -20,19 +20,19 @@ import source_setup as ss
 import source_plot as sp
 
 '''Input Section'''
-SIMULATION = '1500__RUPTURE__600s_79pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0747m__MAGMA_cVF80_n001'
-#SIMULATION = '60__RUPTURE__1000s_256pts__CHAM_1000e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001__'
+#SIMULATION = '1500__RUPTURE__600s_79pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0747m__MAGMA_cVF80_n001'
+SIMULATION = '60__RUPTURE__1000s_256pts__CHAM_1000e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
 #SIMULATION = '150__RUPTURE__500s_128pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
 #SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
 #SIMULATION = '40__RUPTURE__1000s_256pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
-SOURCE_TYPE = 'CONDUIT'  # CHAMBER or CONDUIT
+SOURCE_TYPE = 'CHAMBER'  # CHAMBER or CONDUIT
 REPRESENTATION = 'PS'  # PS (point source) or ES (extended source; ONLY FOR CONDUIT)
-CONTRIBUTION = 'MOMENT'  # MOMENT, FORCE, or BOTH
+CONTRIBUTION = 'FORCE'  # MOMENT, FORCE, or BOTH
 if SOURCE_TYPE == 'CHAMBER':
-    #MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_mt/'
-    #SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_sf/'
-    MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_mt/'
-    SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_sf/'
+    MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_mt/'
+    SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_sf/'
+    #MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_mt/'
+    #SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_sf/'
 if SOURCE_TYPE == 'CONDUIT':
     if REPRESENTATION == 'PS':
         MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_mt/'
@@ -40,7 +40,7 @@ if SOURCE_TYPE == 'CONDUIT':
     elif REPRESENTATION == 'ES':
         MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_mt/1025_interpolated/'
         SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_sf/1025_interpolated/'
-TOTAL_TIME = 600 #1000 #1500 #2998  # in seconds
+TOTAL_TIME = 1000 #1500 #2998  # in seconds
 DT = 0.04 # in seconds (NB: must be same as sampling rate of GFs)
 SAVE = True
 PLOT = True
@@ -50,7 +50,7 @@ MOMENT_PRESSURE = [0, 1, 2]  # moment pressure time series for manual entry
 FORCE_PRESSURE = [0, 1, 2]  # force pressure time series for manual entry
 MANUAL_TIME = [0, 1, 2]  # time for time series for manual entry
 
-direc_base = '/Users/kcoppess/muspelheim/synthetic-seismograms/seismos/diff-transitions/'+SIMULATION
+direc_base = '/Users/kcoppess/muspelheim/synthetic-seismograms/seismos/diff-volumes/'+SIMULATION
 if DERIV == 'DIS':
     direc = direc_base+'/displacement/'
 elif DERIV == 'VEL':
@@ -66,14 +66,14 @@ directory = '/Users/kcoppess/muspelheim/simulation-results/high-res/'+SIMULATION
 zip_filename = directory+'.zip'
 
 conduit_radius = 30  # m
-chamber_vol = 1e5  # m^3
+chamber_vol = 1e9  # m^3
 
 # source depth
 if SOURCE_TYPE == 'CONDUIT':
     point = 501.95  # m
 elif SOURCE_TYPE == 'CHAMBER':
-    #point = 1620.350  # m
-    point = 1028.794  # m
+    point = 1620.350  # m
+    #point = 1028.794  # m
 
 if REPRESENTATION == 'PS':
     DEPTH = str(point * 1e-3)+' km'
@@ -151,11 +151,11 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
     if REPRESENTATION == 'PS':
         r_mom, z_mom, tr_mom, moment = PS.moment_general(SOURCE_TYPE, p, height, time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, deriv=DERIV,
-                                                INTERPOLATE=True, SOURCE_FILTER=False)
+                                                INTERPOLATE=True, SOURCE_FILTER=True)
     elif REPRESENTATION == 'ES':
         r_mom, z_mom, tr_mom, moment = ES.moment_general(p, np.flip(height), time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, deriv=DERIV,
-                                                INTERPOLATE=True, SOURCE_FILTER=False, SAVES=False, mt_savefile=MT_GF_FILE)
+                                                INTERPOLATE=True, SOURCE_FILTER=True, SAVES=False, mt_savefile=MT_GF_FILE)
 
     gc.collect()
     if SAVE:
@@ -172,11 +172,11 @@ if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
     if REPRESENTATION == 'PS':
         r_for, z_for, tr_for, force = PS.force_general(SOURCE_TYPE, f, height, time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, deriv=DERIV,
-                                                INTERPOLATE=True, SOURCE_FILTER=False)
+                                                INTERPOLATE=True, SOURCE_FILTER=True)
     elif REPRESENTATION == 'ES':
         r_for, z_for, tr_for, force = ES.force_general(f, np.flip(height), time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, deriv=DERIV,
-                                                INTERPOLATE=True, SOURCE_FILTER=False, SAVES=False, sf_savefile=SF_GF_FILE)
+                                                INTERPOLATE=True, SOURCE_FILTER=True, SAVES=False, sf_savefile=SF_GF_FILE)
     gc.collect()
     if SAVE:
         np.savetxt(save_file+'FORCE.gz', force, delimiter=',')
@@ -210,14 +210,6 @@ if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
 
 print(SOURCE_TYPE+' '+CONTRIBUTION+' '+REPRESENTATION+' '+DERIV)
 
-#if PLOT:
-#    if CONTRIBUTION == 'FORCE':
-#        plt.plot(time, force)
-#        plt.show()
-#    elif CONTRIBUTION == 'MOMENT':
-#        plt.plot(time, moment)
-#        plt.show()
-
 '''plotting combined waveform'''
 if PLOT:
     colors = ['#F0E442', '#E69F00', '#56B4E9', '#009E73', '#000000']
@@ -231,8 +223,6 @@ if PLOT:
     ax1.set_ylabel('radial ($r$)')
     ax1.set_xlim(0, np.max(time))
     ax1.legend()
-    # ax1.set_ylim(-1.5e-10, 1e-10)
-    #ax1.set_ylim(-0.00003, 0.00003)
 
     for ii in range(nn):
         ax2.plot(time, tr[ii], color=colors[ii], linestyle=line_styles[0], linewidth=1.5)
@@ -242,8 +232,6 @@ if PLOT:
         ax3.plot(time, z[ii], color=colors[ii], linestyle=line_styles[0], linewidth=1.5)
     ax3.set_xlabel('time (s)')
     ax3.set_ylabel('vertical ($\\theta$)')
-
-    # plt.savefig(plot_file+'PS_far_'+str(int(rr / 1000))+'km.png', dpi = 300)
 
     plt.show()
 

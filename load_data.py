@@ -27,7 +27,7 @@ def moment_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME, dt):
     directory = ZipFile(ZIPFILE, mode='r')
 
     time2 = np.loadtxt(io.BytesIO(directory.read('time.txt')), delimiter=',')
-    t_index = np.argwhere(time2 > TOTAL_TIME-0.001)[0,0]
+    t_index = np.argwhere(time2 > TOTAL_TIME-0.000001)[0,0]
     time1 = time2[:t_index]
     # in conduit flow code, this takes up to be positive z and
     # bottom of conduit is at z = 0

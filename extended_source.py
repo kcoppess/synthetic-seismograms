@@ -135,18 +135,6 @@ def moment_general(pressure, depths, time, stationPos, stations, sourceParams, m
     gc.collect()
 
     dmoment_rate = np.gradient(dmoment_dz, dt, axis=-1)
-    #plt.plot(depths, dmoment_rate[:,0])
-    #plt.plot(time, dmoment_rate[0])
-    #plt.plot(time, dmoment_rate[-1])
-    #plt.show()
-    #plt.pcolormesh(time, depths, dmoment_rate)
-    #plt.xlim(0, 1500)
-    #plt.ylim(1000, 0)
-    #plt.ylabel('depth (m)')
-    #plt.xlabel('time (s)')
-    #plt.title('d(moment rate)/dz')
-    #plt.colorbar()
-    #plt.show()
     gc.collect()
 
     TT = np.ma.size(dmoment_dz, axis=1)-SHIFT  # number of time points
@@ -157,11 +145,6 @@ def moment_general(pressure, depths, time, stationPos, stations, sourceParams, m
     dmom_rate_hat = np.fft.fft(dmoment_rate, axis=1) * dt
     gc.collect()
 
-    #dvel_z = np.zeros((NN, HH, TT), dtype='complex')
-    #dvel_r = np.zeros((NN, HH, TT), dtype='complex')
-    #dvel_tr = np.zeros((NN, HH, TT), dtype='complex')
-    
-    #repeated_depth = [10, 15, 16, 16]
     repeated_depth = [0, 0, 0, 0]
 
     vel_z = np.zeros((NN, TT), dtype='complex')
@@ -171,7 +154,6 @@ def moment_general(pressure, depths, time, stationPos, stations, sourceParams, m
         print(stat)
         gf_time, gfs = gf.load_gfs_ES(mt_gf_file+stat+'/', 0, GFtime, depths, INTERPOLATE_TIME=INTERPOLATE, INTERPOLATE_SPACE=INTERPOLATE, 
                                     SAVE=SAVES, save_file=mt_savefile+stat+'/', PLOT=False, REPEATED=repeated_depth[ii])
-        #print(np.max(abs(gfs[0][:,:,2])))
         print('loaded gfs...')
         gfs_hat = []
         for gg in gfs:
@@ -185,14 +167,6 @@ def moment_general(pressure, depths, time, stationPos, stations, sourceParams, m
         dvel_z += np.fft.ifft(dmom_rate_hat * moment_tensor[1,1] * gfs_hat[3][:,:,0], axis=-1)[:,SHIFT:] / dt
         dvel_z += np.fft.ifft(dmom_rate_hat * moment_tensor[1,2] * gfs_hat[4][:,:,0], axis=-1)[:,SHIFT:] / dt
         dvel_z += np.fft.ifft(dmom_rate_hat * moment_tensor[2,2] * gfs_hat[5][:,:,0], axis=-1)[:,SHIFT:] / dt
-        #plt.pcolormesh(time, depths, np.real(dvel_z))
-        #plt.xlim(0, 150)
-        #plt.ylim(400, 0)
-        #plt.ylabel('depth (m)')
-        #plt.xlabel('time (s)')
-        #plt.title('d(vel_z)/dz')
-        #plt.colorbar()
-        #plt.show()
         vel_z[ii] = hp.integration_trapezoid(depths, np.array([dvel_z]))[0]
         gc.collect()
 
@@ -202,14 +176,6 @@ def moment_general(pressure, depths, time, stationPos, stations, sourceParams, m
         dvel_r += np.fft.ifft(dmom_rate_hat * moment_tensor[1,1] * gfs_hat[3][:,:,1], axis=-1)[:,SHIFT:] / dt
         dvel_r += np.fft.ifft(dmom_rate_hat * moment_tensor[1,2] * gfs_hat[4][:,:,1], axis=-1)[:,SHIFT:] / dt
         dvel_r += np.fft.ifft(dmom_rate_hat * moment_tensor[2,2] * gfs_hat[5][:,:,1], axis=-1)[:,SHIFT:] / dt
-        #plt.pcolormesh(time, depths, np.real(dvel_r))
-        #plt.xlim(0, 150)
-        #plt.ylim(400, 0)
-        #plt.ylabel('depth (m)')
-        #plt.xlabel('time (s)')
-        #plt.title('d(vel_r)/dz')
-        #plt.colorbar()
-        #plt.show()
         vel_r[ii] = hp.integration_trapezoid(depths, np.array([dvel_r]))[0]
         gc.collect()
 
@@ -219,23 +185,12 @@ def moment_general(pressure, depths, time, stationPos, stations, sourceParams, m
         dvel_tr += np.fft.ifft(dmom_rate_hat * moment_tensor[1,1] * gfs_hat[3][:,:,2], axis=-1)[:,SHIFT:] / dt
         dvel_tr += np.fft.ifft(dmom_rate_hat * moment_tensor[1,2] * gfs_hat[4][:,:,2], axis=-1)[:,SHIFT:] / dt
         dvel_tr += np.fft.ifft(dmom_rate_hat * moment_tensor[2,2] * gfs_hat[5][:,:,2], axis=-1)[:,SHIFT:] / dt
-        #plt.pcolormesh(time, depths, np.real(dvel_tr))
-        #plt.xlim(0, 150)
-        #plt.ylim(300, 0)
-        #plt.ylabel('depth (m)')
-        #plt.xlabel('time (s)')
-        #plt.title('d(vel_tr)/dz')
-        #plt.colorbar()
-        #plt.show()
         vel_tr[ii] = hp.integration_trapezoid(depths, np.array([dvel_tr]))[0]
         gc.collect()
 
         print('finished convolution')
         print('---------------------------------------------')
 
-    #vel_z = hp.integration_trapezoid(depths, dvel_z)
-    #vel_r = hp.integration_trapezoid(depths, dvel_r)
-    #vel_tr = hp.integration_trapezoid(depths, dvel_tr)
     gc.collect()
     print('finished integration')
     
@@ -347,14 +302,6 @@ def force_general(force, depths, time, stationPos, stations, sourceParams, mediu
     
     # NB: Zhu GF for downward impulse
     dforce_rate = np.gradient(dforce_dz, dt, axis=-1)
-    #plt.pcolormesh(time, depths, dforce_dz[:,SHIFT:])
-    #plt.xlim(0, 1000)
-    #plt.ylim(1000, 0)
-    #plt.ylabel('depth (m)')
-    #plt.xlabel('time (s)')
-    #plt.title('dforce_rate')
-    #plt.colorbar()
-    #plt.show()
     gc.collect()
 
     TT = np.ma.size(dforce_dz, axis=1)-SHIFT  # number of time points
@@ -365,11 +312,6 @@ def force_general(force, depths, time, stationPos, stations, sourceParams, mediu
     dfor_rate_hat = np.fft.fft(dforce_rate, axis=1) * dt
     gc.collect()
 
-    #dvel_z = np.zeros((NN, HH, TT), dtype='complex')
-    #dvel_r = np.zeros((NN, HH, TT), dtype='complex')
-    #dvel_tr = np.zeros((NN, HH, TT), dtype='complex')
-
-    #repeated_depth = [10, 15, 16, 16]
     repeated_depth = [0,0,0,0]
     
     vel_z = np.zeros((NN, TT), dtype='complex')
@@ -388,46 +330,19 @@ def force_general(force, depths, time, stationPos, stations, sourceParams, mediu
             gc.collect()
         print('fourier transformed gfs...')
         dvel_z = np.fft.ifft(dfor_rate_hat * gfs_hat[1][:,:,0], axis=-1)[:,SHIFT:] / dt
-        #plt.pcolormesh(time, depths, np.real(dvel_z))
-        #plt.xlim(0, 1000)
-        #plt.ylim(1000, 0)
-        #plt.ylabel('depth (m)')
-        #plt.xlabel('time (s)')
-        #plt.title('d(vel_z)/dz')
-        #plt.colorbar()
-        #plt.show()
         vel_z[ii] = hp.integration_trapezoid(depths, np.array([dvel_z]))[0]
         gc.collect()
 
         dvel_r = np.fft.ifft(dfor_rate_hat * gfs_hat[1][:,:,1], axis=-1)[:,SHIFT:] / dt
-        #plt.pcolormesh(time, depths, np.real(dvel_r))
-        #plt.xlim(0, 1000)
-        #plt.ylim(1000, 0)
-        #plt.ylabel('depth (m)')
-        #plt.xlabel('time (s)')
-        #plt.title('d(vel_r)/dz')
-        #plt.colorbar()
-        #plt.show()
         vel_r[ii] = hp.integration_trapezoid(depths, np.array([dvel_r]))[0]
         gc.collect()
 
         dvel_tr = np.fft.ifft(dfor_rate_hat * gfs_hat[1][:,:,2], axis=-1)[:,SHIFT:] / dt
-        #plt.pcolormesh(time, depths, np.real(dvel_tr))
-        #plt.xlim(0, 150)
-        #plt.ylim(300, 0)
-        #plt.ylabel('depth (m)')
-        #plt.xlabel('time (s)')
-        #plt.title('d(vel_tr)/dz')
-        #plt.colorbar()
-        #plt.show()
         vel_tr[ii] = hp.integration_trapezoid(depths, np.array([dvel_tr]))[0]
         gc.collect()
         print('finished convolution')
         print('---------------------------------------------')
     
-    #vel_z = hp.integration_trapezoid(depths, dvel_z)
-    #vel_r = hp.integration_trapezoid(depths, dvel_r)
-    #vel_tr = hp.integration_trapezoid(depths, dvel_tr)
     gc.collect()
     print('finished integration')
 
