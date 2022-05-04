@@ -76,6 +76,9 @@ elif SOURCE_TYPE == 'CHAMBER':
     #point = 1028.794  # m
 
 if REPRESENTATION == 'PS':
+    point = 1028.794  # m
+
+if REPRESENTATION == 'PS':
     DEPTH = str(point * 1e-3)+' km'
 else:
     DEPTH = ''
@@ -232,7 +235,4 @@ if PLOT:
         ax3.plot(time, z[ii], color=colors[ii], linestyle=line_styles[0], linewidth=1.5)
     ax3.set_xlabel('time (s)')
     ax3.set_ylabel('vertical ($\\theta$)')
-
-    plt.show()
-
 
