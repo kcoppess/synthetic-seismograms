@@ -8,6 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import gc
 import os
+import argparse
 from zipfile import ZipFile
 import scipy.signal as sg
 import scipy.interpolate as si
@@ -20,6 +21,23 @@ import source_setup as ss
 import source_plot as sp
 
 '''Input Section'''
+parser = argparse.ArgumentParser(description='calculating synthetic seismograms',
+                                 formatter_class=argparse.ArgumentDefaultHelpFormatter)
+'''required inputs'''
+parser.add_argument('sim', help='simulation label (used as path_to_simulation/<sim>.zip)')
+parser.add_argument('path', help='path to directory where simulation results stored')
+parser.add_argument('st', help='source type (options: CHAMBER or CONDUIT')
+parser.add_argument('rep', help='PS (point source representation) or ES (extended source representation; only used for conduit)')
+parser.add_argument('con', help='calculate force and/or moment contributions to seismogram (options: FORCE, MOMENT, BOTH)')
+parser.add_argument('der', help='ACC (returns acceleration seismograms), VEL (velocity), DIS (displacement)')
+
+'''optional inputs'''
+parser.add_argument('-s', '--save', help='path to directory where synthetic seismograms and force/moment histories are saved (default: no saving)')
+parser.add_argument('-p', '--plot', action='store_true', help='display plot of synthetic seismograms')
+
+
+
+
 #SIMULATION = '1500__RUPTURE__600s_79pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0747m__MAGMA_cVF80_n001'
 SIMULATION = '60__RUPTURE__1000s_256pts__CHAM_1000e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
 #SIMULATION = '150__RUPTURE__500s_128pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
