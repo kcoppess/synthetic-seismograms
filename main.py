@@ -20,23 +20,45 @@ import helpers as hp
 import source_setup as ss
 import source_plot as sp
 
-'''Input Section'''
+'''
+-------------------
+COMMAND LINE INPUTS
+-------------------
+'''
 parser = argparse.ArgumentParser(description='calculating synthetic seismograms',
-                                 formatter_class=argparse.ArgumentDefaultHelpFormatter)
+                                 formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 '''required inputs'''
 parser.add_argument('sim', help='simulation label (used as path_to_simulation/<sim>.zip)')
 parser.add_argument('path', help='path to directory where simulation results stored')
-parser.add_argument('st', help='source type (options: CHAMBER or CONDUIT')
+parser.add_argument('stp', help='source type (options: CHAMBER or CONDUIT)')
 parser.add_argument('rep', help='PS (point source representation) or ES (extended source representation; only used for conduit)')
 parser.add_argument('con', help='calculate force and/or moment contributions to seismogram (options: FORCE, MOMENT, BOTH)')
 parser.add_argument('der', help='ACC (returns acceleration seismograms), VEL (velocity), DIS (displacement)')
 
 '''optional inputs'''
-parser.add_argument('-s', '--save', help='path to directory where synthetic seismograms and force/moment histories are saved (default: no saving)')
+parser.add_argument('-s', '--save', default='no saving',
+                    help='path to directory where synthetic seismograms and force/moment histories are saved')
 parser.add_argument('-p', '--plot', action='store_true', help='display plot of synthetic seismograms')
+parser.add_argument('--total_time', default=1000.0, type=float,
+                    help='total time in seconds for synthetic seismograms')
+parser.add_argument('--dt', default=0.04, type=float,
+                    help='time step size in seconds (needs to be >= GF time step size)')
+parser.add_argument('--MTGF', default='see main.py',
+                    help='path to directory storing moment tensor Greens functions')
+parser.add_argument('--SFGF', default='see main.py',
+                    help='path to directory storing single force Greens functions')
+parser.add_argument('--sourcedepth', default=0, type=float, 
+        help='depth of point source in meters (assumes on z-axis): 500m (conduit) or 1028.794m (chamber)')
+parser.add_argument('--chamvol', default=1e5, type=float, 
+                    help='magma chamber volume in m^3')
+parser.add_argument('--condrad', default=30, type=float,
+                    help='cylindrical conduit radius in meters')
+parser.add_argument('--stations', default='station_pos.txt', 
+                    help='file with station labels and coordinates with origin at center of conduit vent')
 
+args = parser.parse_args()
 
-
+quit()
 
 #SIMULATION = '1500__RUPTURE__600s_79pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0747m__MAGMA_cVF80_n001'
 SIMULATION = '60__RUPTURE__1000s_256pts__CHAM_1000e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
