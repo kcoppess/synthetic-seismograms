@@ -25,7 +25,8 @@ import source_plot as sp
 COMMAND LINE INPUTS
 -------------------
 '''
-parser = argparse.ArgumentParser(description='calculating synthetic seismograms',
+parser = argparse.ArgumentParser(description='Calculating synthetic seismograms. Two options for inputting parameters: (1) load in from file: main.py @[argument-file].txt (see ex_args.txt for example) or (2) see usage above.',
+                                 fromfile_prefix_chars='@',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 '''required inputs'''
 parser.add_argument('sim', help='simulation label (used as path_to_simulation/<sim>.zip)')
@@ -39,7 +40,7 @@ parser.add_argument('der', help='ACC (returns acceleration seismograms), VEL (ve
 parser.add_argument('-s', '--save', default='no saving',
                     help='path to directory where synthetic seismograms and force/moment histories are saved')
 parser.add_argument('-p', '--plot', action='store_true', help='display plot of synthetic seismograms')
-parser.add_argument('--total_time', default=1000.0, type=float,
+parser.add_argument('--total_time', default=2998, type=float,
                     help='total time in seconds for synthetic seismograms')
 parser.add_argument('--dt', default=0.04, type=float,
                     help='time step size in seconds (needs to be >= GF time step size)')
@@ -47,7 +48,7 @@ parser.add_argument('--MTGF', default='see main.py',
                     help='path to directory storing moment tensor Greens functions')
 parser.add_argument('--SFGF', default='see main.py',
                     help='path to directory storing single force Greens functions')
-parser.add_argument('--sourcedepth', default=0, type=float, 
+parser.add_argument('--sourcedepth', default=-173, type=float, 
         help='depth of point source in meters (assumes on z-axis): 500m (conduit) or 1028.794m (chamber)')
 parser.add_argument('--chamvol', default=1e5, type=float, 
                     help='magma chamber volume in m^3')
@@ -58,65 +59,133 @@ parser.add_argument('--stations', default='station_pos.txt',
 
 args = parser.parse_args()
 
-quit()
+
+'''
+---------------------------------------------------
+Translating input arguments into relevant variables
+---------------------------------------------------
+'''
+SIMULATION = args.sim
+directory = args.path + SIMULATION
+zip_filename = directory + '.zip'
+
+SOURCE_TYPE = args.stp
+REPRESENTATION = args.rep
+CONTRIBUTION = args.con
+DERIV = args.der
+
+if args.save == 'no saving':
+    SAVE = False
+else:
+    SAVE = True
+    direc_base = args.save + SIMULATION
+    if DERIV == 'DIS':
+        direc = direc_base+'/displacement/'
+    elif DERIV == 'VEL':
+        direc = direc_base+'/velocity/'
+    else:
+        direc = direc_base+'/acceleration/'
+    save_file = direc+SOURCE_TYPE+'__'+REPRESENTATION+'__'
+    if not os.path.exists(direc):
+        os.makedirs(direc)
+
+PLOT = args.plot
+TOTAL_TIME = args.total_time
+DT = args.dt
+
+if args.MTGF == 'see main.py':
+    if SOURCE_TYPE == 'CHAMBER':
+        MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_mt/'
+    elif SOURCE_TYPE == 'CONDUIT':
+        if REPRESENTATION == 'PS':
+            MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_mt/'
+        elif REPRESENTATION == 'ES':
+            MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_mt/1025_interpolated/'
+else:
+    MT_GF_FILE = args.MTGF
+
+if args.SFGF == 'see main.py':
+    if SOURCE_TYPE == 'CHAMBER':
+        SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_sf/'
+    elif SOURCE_TYPE == 'CONDUIT':
+        if REPRESENTATION == 'PS':
+            SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_sf/'
+        elif REPRESENTATION == 'ES':
+            SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_sf/1025_interpolated/'
+else:
+    SF_GF_FILE = args.SFGF
+
+if args.sourcedepth < 0:
+    if SOURCE_TYPE == 'CONDUIT':
+        point = 501.95  # m
+    elif SOURCE_TYPE == 'CHAMBER':
+        point = 1028.794  # m
+else:
+    point = args.sourcedepth
+
+chamber_vol = args.chamvol
+conduit_radius = args.condrad
+
+gc.collect()
+#quit()
 
 #SIMULATION = '1500__RUPTURE__600s_79pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0747m__MAGMA_cVF80_n001'
-SIMULATION = '60__RUPTURE__1000s_256pts__CHAM_1000e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
+#SIMULATION = '60__RUPTURE__1000s_256pts__CHAM_1000e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
 #SIMULATION = '150__RUPTURE__500s_128pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
 #SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
 #SIMULATION = '40__RUPTURE__1000s_256pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
-SOURCE_TYPE = 'CHAMBER'  # CHAMBER or CONDUIT
-REPRESENTATION = 'PS'  # PS (point source) or ES (extended source; ONLY FOR CONDUIT)
-CONTRIBUTION = 'FORCE'  # MOMENT, FORCE, or BOTH
-if SOURCE_TYPE == 'CHAMBER':
-    MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_mt/'
-    SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_sf/'
-    #MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_mt/'
-    #SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_sf/'
-if SOURCE_TYPE == 'CONDUIT':
-    if REPRESENTATION == 'PS':
-        MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_mt/'
-        SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_sf/'
-    elif REPRESENTATION == 'ES':
-        MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_mt/1025_interpolated/'
-        SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_sf/1025_interpolated/'
-TOTAL_TIME = 1000 #1500 #2998  # in seconds
-DT = 0.04 # in seconds (NB: must be same as sampling rate of GFs)
-SAVE = True
-PLOT = True
-DERIV = 'VEL'  # ACC, VEL, or DIS
+#SOURCE_TYPE = 'CHAMBER'  # CHAMBER or CONDUIT
+#REPRESENTATION = 'PS'  # PS (point source) or ES (extended source; ONLY FOR CONDUIT)
+#CONTRIBUTION = 'FORCE'  # MOMENT, FORCE, or BOTH
+#if SOURCE_TYPE == 'CHAMBER':
+#    MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_mt/'
+#    SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_sf/'
+#    #MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_mt/'
+#    #SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_sf/'
+#if SOURCE_TYPE == 'CONDUIT':
+#    if REPRESENTATION == 'PS':
+#        MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_mt/'
+#        SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_sf/'
+#    elif REPRESENTATION == 'ES':
+#        MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_mt/1025_interpolated/'
+#        SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_sf/1025_interpolated/'
+#TOTAL_TIME = 1000 #1500 #2998  # in seconds
+#DT = 0.04 # in seconds (NB: must be same as sampling rate of GFs)
+#SAVE = True
+#PLOT = True
+#DERIV = 'VEL'  # ACC, VEL, or DIS
 TIME_INPUT = ''  # MANUAL or anything else (anything other than MANUAL draws data from the file directory)
 MOMENT_PRESSURE = [0, 1, 2]  # moment pressure time series for manual entry
 FORCE_PRESSURE = [0, 1, 2]  # force pressure time series for manual entry
 MANUAL_TIME = [0, 1, 2]  # time for time series for manual entry
 
-direc_base = '/Users/kcoppess/muspelheim/synthetic-seismograms/seismos/diff-volumes/'+SIMULATION
-if DERIV == 'DIS':
-    direc = direc_base+'/displacement/'
-elif DERIV == 'VEL':
-    direc = direc_base+'/velocity/'
-else:
-    direc = direc_base+'/acceleration/'
-save_file = direc+SOURCE_TYPE+'__'+REPRESENTATION+'__'
-if not os.path.exists(direc):
-    os.makedirs(direc)
+#direc_base = '/Users/kcoppess/muspelheim/synthetic-seismograms/seismos/diff-volumes/'+SIMULATION
+#if DERIV == 'DIS':
+#    direc = direc_base+'/displacement/'
+#elif DERIV == 'VEL':
+#    direc = direc_base+'/velocity/'
+#else:
+#    direc = direc_base+'/acceleration/'
+#save_file = direc+SOURCE_TYPE+'__'+REPRESENTATION+'__'
+#if not os.path.exists(direc):
+#    os.makedirs(direc)
 
-directory = '/Users/kcoppess/muspelheim/simulation-results/high-res/'+SIMULATION
-#directory = '/Users/kcoppess/muspelheim/simulation-results/plug_rupture/'+SIMULATION
-zip_filename = directory+'.zip'
+#directory = '/Users/kcoppess/muspelheim/simulation-results/high-res/'+SIMULATION
+##directory = '/Users/kcoppess/muspelheim/simulation-results/plug_rupture/'+SIMULATION
+#zip_filename = directory+'.zip'
 
-conduit_radius = 30  # m
-chamber_vol = 1e9  # m^3
+#conduit_radius = 30  # m
+#chamber_vol = 1e9  # m^3
 
-# source depth
-if SOURCE_TYPE == 'CONDUIT':
-    point = 501.95  # m
-elif SOURCE_TYPE == 'CHAMBER':
-    point = 1620.350  # m
-    #point = 1028.794  # m
+## source depth
+#if SOURCE_TYPE == 'CONDUIT':
+#    point = 501.95  # m
+#elif SOURCE_TYPE == 'CHAMBER':
+#    point = 1620.350  # m
+#    #point = 1028.794  # m
 
-if REPRESENTATION == 'PS':
-    point = 1028.794  # m
+#if REPRESENTATION == 'PS':
+#    point = 1028.794  # m
 
 if REPRESENTATION == 'PS':
     DEPTH = str(point * 1e-3)+' km'

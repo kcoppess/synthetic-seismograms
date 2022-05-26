@@ -1,0 +1,8 @@
+60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001
+/Users/kcoppess/muspelheim/simulation-results/high-res/
+CONDUIT
+PS
+MOMENT
+VEL
+-p
+-s /Users/kcoppess/muspelheim/synthetic-seismograms/seismos/diff-volumes/
