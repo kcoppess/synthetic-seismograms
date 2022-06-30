@@ -5,4 +5,4 @@ PS
 MOMENT
 VEL
 -p
--s /Users/kcoppess/muspelheim/synthetic-seismograms/seismos/diff-volumes/
+-s/Users/kcoppess/muspelheim/synthetic-seismograms/seismos/diff-volumes/
