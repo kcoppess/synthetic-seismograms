@@ -59,12 +59,12 @@ parser.add_argument('--stations', default='station_pos.txt',
 
 args = parser.parse_args()
 
-
 '''
 ---------------------------------------------------
 Translating input arguments into relevant variables
 ---------------------------------------------------
 '''
+
 SIMULATION = args.sim
 directory = args.path + SIMULATION
 zip_filename = directory + '.zip'
@@ -194,11 +194,20 @@ else:
 
 '''------------------------------------------------------------------------------------------'''
 '''receiver/seismometer specs'''
+
+labels = np.loadtxt(args.stations, dtype=str, comments='#', delimiter=' ', usecols=0)
+
+pos = np.loadtxt(args.stations, dtype=float, comments='#', delimiter=' ', usecols=(1,2,3))
+#print(labels)
+
+#from sys import exit
+#exit()
+
 # number of seismometers
-nn = 4
+nn = len(labels)
 # seismometer distances from vent (m)
 #rr = [10000]
-rr = [1000, 3000, 10000, 30000]
+#rr = [1000, 3000, 10000, 30000]
 
 '''
 spatial coordinate labels
@@ -206,14 +215,14 @@ nn seismometers with (x,y,z) position
 fixing seismometers to x-z plane cutting through the source at origin (y = 0)
 '''
 #labels = ['10km'] #, '30km']
-labels = ['1km', '3km', '10km', '30km']
+#labels = ['1km', '3km', '10km', '30km']
 # vector positions for each seismometer
 #pos = np.array([[rr[0], 0, 0]]) #,
 ##                [rr[1], 0, 0]])
-pos = np.array([[rr[0], 0, 0],
-                [rr[1], 0, 0],
-                [rr[2], 0, 0],
-                [rr[3], 0, 0]])
+#pos = np.array([[rr[0], 0, 0],
+#                [rr[1], 0, 0],
+#                [rr[2], 0, 0],
+#                [rr[3], 0, 0]])
 
 '''------------------------------------------------------------------------------------------'''
 

@@ -1,0 +1,5 @@
+# station labels and position x-y-z coordinates (in m)
+1km 1000 0 0
+3km 3000 0 0
+10km 10000 0 0
+30km 30000 0 0
