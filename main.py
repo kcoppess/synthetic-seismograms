@@ -49,7 +49,7 @@ parser.add_argument('--MTGF', default='see main.py',
 parser.add_argument('--SFGF', default='see main.py',
                     help='path to directory storing single force Greens functions')
 parser.add_argument('--sourcedepth', default=-173, type=float, 
-        help='depth of point source in meters (assumes on z-axis): 500m (conduit) or 1028.794m (chamber)')
+        help='depth of point source in meters (assumes on z-axis; only relevant for frankenstein analytical calculation): 500m (conduit) or 1028.794m (chamber)')
 parser.add_argument('--chamvol', default=1e5, type=float, 
                     help='magma chamber volume in m^3')
 parser.add_argument('--condrad', default=30, type=float,
