@@ -48,14 +48,14 @@ def moment_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME, dt):
     length = int(TOTAL_TIME / dt)
     time = np.arange(length) * dt
 
-    time_smooth = si.interp1d(np.arange(len(time1))[::modulo], time1[::modulo], kind='cubic')
+    time_smooth = si.interp1d(np.arange(len(time1))[::modulo], time1[::modulo], kind='cubic', fill_value='extrapolate')
     times = time_smooth(np.arange(len(time1))[:-modulo])
 
     if SOURCE_TYPE == 'CONDUIT':
-        smooth = si.interp1d(times, p1[:, :-modulo], kind='cubic', axis=1)
+        smooth = si.interp1d(times, p1[:, :-modulo], kind='cubic', axis=1, fill_value='extrapolate')
         p = smooth(time)
     elif SOURCE_TYPE == 'CHAMBER':
-        smooth = si.interp1d(times, p1[:-modulo], kind='cubic')
+        smooth = si.interp1d(times, p1[:-modulo], kind='cubic', fill_value='extrapolate')
         p = smooth(time)
 
     gc.collect()
@@ -109,16 +109,16 @@ def force_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME, dt):
     length = int(TOTAL_TIME / dt)
     time = np.arange(length) * dt
 
-    time_smooth = si.interp1d(np.arange(len(time1))[::modulo], time1[::modulo], kind='cubic')
+    time_smooth = si.interp1d(np.arange(len(time1))[::modulo], time1[::modulo], kind='cubic', fill_value='extrapolate')
     times = time_smooth(np.arange(len(time1))[:-modulo])
 
     if SOURCE_TYPE == 'CONDUIT':
-        smooth = si.interp1d(times, f1[:, :-modulo], kind='cubic', axis=1)
+        smooth = si.interp1d(times, f1[:, :-modulo], kind='cubic', axis=1, fill_value='extrapolate')
         f = smooth(time)
     elif SOURCE_TYPE == 'CHAMBER':
-        smooth_a = si.interp1d(times, f1a[:-modulo], kind='cubic')
+        smooth_a = si.interp1d(times, f1a[:-modulo], kind='cubic', fill_value='extrapolate')
         fa = smooth_a(time)
-        smooth_b = si.interp1d(times, df1b_dt[:-modulo], kind='cubic')
+        smooth_b = si.interp1d(times, df1b_dt[:-modulo], kind='cubic', fill_value='extrapolate')
         dfb_dt = smooth_b(time)
 
         fb = sint.cumtrapz(dfb_dt, x=time, initial=0)
