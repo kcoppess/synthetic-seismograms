@@ -127,65 +127,13 @@ chamber_vol = args.chamvol
 conduit_radius = args.condrad
 
 gc.collect()
-#quit()
 
-#SIMULATION = '1500__RUPTURE__600s_79pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0747m__MAGMA_cVF80_n001'
-#SIMULATION = '60__RUPTURE__1000s_256pts__CHAM_1000e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
-#SIMULATION = '150__RUPTURE__500s_128pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
-#SIMULATION = '60__RUPTURE__3000s_1024pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
-#SIMULATION = '40__RUPTURE__1000s_256pts__CHAM_00e6m3__PLUG_02e6Pa_1e-03_pos0750m__MAGMA_cVF80_n001'
-#SOURCE_TYPE = 'CHAMBER'  # CHAMBER or CONDUIT
-#REPRESENTATION = 'PS'  # PS (point source) or ES (extended source; ONLY FOR CONDUIT)
-#CONTRIBUTION = 'FORCE'  # MOMENT, FORCE, or BOTH
-#if SOURCE_TYPE == 'CHAMBER':
-#    MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_mt/'
-#    SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.620350_sf/'
-#    #MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_mt/'
-#    #SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_chamber/halfA_1.028794_sf/'
-#if SOURCE_TYPE == 'CONDUIT':
-#    if REPRESENTATION == 'PS':
-#        MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_mt/'
-#        SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_sf/'
-#    elif REPRESENTATION == 'ES':
-#        MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_mt/1025_interpolated/'
-#        SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_sf/1025_interpolated/'
-#TOTAL_TIME = 1000 #1500 #2998  # in seconds
-#DT = 0.04 # in seconds (NB: must be same as sampling rate of GFs)
-#SAVE = True
-#PLOT = True
-#DERIV = 'VEL'  # ACC, VEL, or DIS
+
 TIME_INPUT = ''  # MANUAL or anything else (anything other than MANUAL draws data from the file directory)
 MOMENT_PRESSURE = [0, 1, 2]  # moment pressure time series for manual entry
 FORCE_PRESSURE = [0, 1, 2]  # force pressure time series for manual entry
 MANUAL_TIME = [0, 1, 2]  # time for time series for manual entry
 
-#direc_base = '/Users/kcoppess/muspelheim/synthetic-seismograms/seismos/diff-volumes/'+SIMULATION
-#if DERIV == 'DIS':
-#    direc = direc_base+'/displacement/'
-#elif DERIV == 'VEL':
-#    direc = direc_base+'/velocity/'
-#else:
-#    direc = direc_base+'/acceleration/'
-#save_file = direc+SOURCE_TYPE+'__'+REPRESENTATION+'__'
-#if not os.path.exists(direc):
-#    os.makedirs(direc)
-
-#directory = '/Users/kcoppess/muspelheim/simulation-results/high-res/'+SIMULATION
-##directory = '/Users/kcoppess/muspelheim/simulation-results/plug_rupture/'+SIMULATION
-#zip_filename = directory+'.zip'
-
-#conduit_radius = 30  # m
-#chamber_vol = 1e9  # m^3
-
-## source depth
-#if SOURCE_TYPE == 'CONDUIT':
-#    point = 501.95  # m
-#elif SOURCE_TYPE == 'CHAMBER':
-#    point = 1620.350  # m
-#    #point = 1028.794  # m
-
-#if REPRESENTATION == 'PS':
-#    point = 1028.794  # m
 
 if REPRESENTATION == 'PS':
     DEPTH = str(point * 1e-3)+' km'
@@ -193,36 +141,14 @@ else:
     DEPTH = ''
 
 '''------------------------------------------------------------------------------------------'''
-'''receiver/seismometer specs'''
-
-labels = np.loadtxt(args.stations, dtype=str, comments='#', delimiter=' ', usecols=0)
-
-pos = np.loadtxt(args.stations, dtype=float, comments='#', delimiter=' ', usecols=(1,2,3))
-#print(labels)
-
-#from sys import exit
-#exit()
-
-# number of seismometers
-nn = len(labels)
-# seismometer distances from vent (m)
-#rr = [10000]
-#rr = [1000, 3000, 10000, 30000]
-
 '''
+receiver/seismometer specs:
 spatial coordinate labels
 nn seismometers with (x,y,z) position
-fixing seismometers to x-z plane cutting through the source at origin (y = 0)
 '''
-#labels = ['10km'] #, '30km']
-#labels = ['1km', '3km', '10km', '30km']
-# vector positions for each seismometer
-#pos = np.array([[rr[0], 0, 0]]) #,
-##                [rr[1], 0, 0]])
-#pos = np.array([[rr[0], 0, 0],
-#                [rr[1], 0, 0],
-#                [rr[2], 0, 0],
-#                [rr[3], 0, 0]])
+labels = np.loadtxt(args.stations, dtype=str, comments='#', delimiter=' ', usecols=0)
+pos = np.loadtxt(args.stations, dtype=float, comments='#', delimiter=' ', usecols=(1,2,3))
+nn = len(labels)
 
 '''------------------------------------------------------------------------------------------'''
 
