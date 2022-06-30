@@ -33,7 +33,7 @@ parser.add_argument('sim', help='simulation label (used as path_to_simulation/<s
 parser.add_argument('path', help='path to directory where simulation results stored')
 parser.add_argument('stp', help='source type (options: CHAMBER or CONDUIT)')
 parser.add_argument('rep', help='PS (point source representation) or ES (extended source representation; only used for conduit)')
-parser.add_argument('con', help='calculate force and/or moment contributions to seismogram (options: FORCE, MOMENT, BOTH)')
+parser.add_argument('con', help='calculate force and/or moment contributions to seismogram (options: FORCE, MOMENT)')
 parser.add_argument('der', help='ACC (returns acceleration seismograms), VEL (velocity), DIS (displacement)')
 
 '''optional inputs'''
