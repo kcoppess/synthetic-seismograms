@@ -5,9 +5,9 @@ rho = 2.7 g/cm^3
 poisson ratio = 0.25
 
 point source depths (km):
-    conduit: 0.25780999999999993 0.50195 0.6289100000000001
+    conduit: 0.50195 3.01
     chamber: 1.028794 1.062035 1.133650 1.287941 1.620350
-extended source depth range (km): 0 - 1
+extended source depth range (km): 0 - 1 OR 0 - 6
 
 station distances (km): 1, 3, 10, 30
 
