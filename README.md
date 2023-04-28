@@ -67,17 +67,17 @@ Currently, input files are assumed to be in .zip format (functionality for .mat 
 
 Required data files:
 
-    * `height.txt` : depths of grid points tracked in simulation (assumes uniform spacing and positive is up and bottom of conduit is at 0)
-    * `time.txt` : time points
-    * for MOMENT calculations:
-        * CONDUIT: `pressure.txt` : array of pressure along conduit with shape (# of grid points, # of time points)
-        * CHAMBER: `chamber_pressure.txt` : chamber pressure at each time point with shape (# of time points)
-    * for FORCE calculations:
-        * CONDUIT: `wall_trac.txt` : array of shear traction acting ON magma (i.e. opposite sign of on earth) with same shape as pressure
-        * CHAMBER:
-            * `chamber_pressure.txt` : see above
-            * `density.txt` : magma density (same shape as pressure)
-            * `velocity.txt` : magma particle velocity (same shape as pressure)
+* `height.txt` : depths of grid points tracked in simulation (assumes uniform spacing and positive is up and bottom of conduit is at 0)
+* `time.txt` : time points
+* for MOMENT calculations:
+    * CONDUIT: `pressure.txt` : array of pressure along conduit with shape (# of grid points, # of time points)
+    * CHAMBER: `chamber_pressure.txt` : chamber pressure at each time point with shape (# of time points)
+* for FORCE calculations:
+    * CONDUIT: `wall_trac.txt` : array of shear traction acting ON magma (i.e. opposite sign of on earth) with same shape as pressure
+    * CHAMBER:
+        * `chamber_pressure.txt` : see above
+        * `density.txt` : magma density (same shape as pressure)
+        * `velocity.txt` : magma particle velocity (same shape as pressure)
 
 Loaded data will then be processed to smooth out any numerical effects (e.g. from downsampling), as well
 as interpolate to get constant time-stepping (which is assumed in the remaining workflow). See 
