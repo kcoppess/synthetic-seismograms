@@ -87,6 +87,7 @@ as interpolate to get constant time-stepping (which is assumed in the remaining 
 Default Green's functions were calculated using code base developed by Zhu, L., & Rivera, L. A. (2002).
 These are stored in the directory `greens_functions/halfspace`. The medium and other input parameters
 used are noted in `specs.txt`, along with source and receiver positions that have been calculated.
+
 Point-source GF are labeled as `halfA_{source depth}_{mt|sf}` with `mt` noting moment tensor GF and `sf`
 noting single force GF. Extended-source GF are labeled as `extended_{source extent}_{mt|sf}`. Within
 each of these directories are directories labeled by receiver position relative to vent (can also be
