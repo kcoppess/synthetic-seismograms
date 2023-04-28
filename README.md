@@ -66,6 +66,7 @@ Example simulation data files can be found on [Open Science Framework](https://d
 Currently, input files are assumed to be in .zip format (functionality for .mat formats is in the works). 
 
 Required data files:
+
     - `height.txt` : depths of grid points tracked in simulation (assumes uniform spacing and positive is up and bottom of conduit is at 0)
     - `time.txt` : time points
     - for MOMENT calculations:
