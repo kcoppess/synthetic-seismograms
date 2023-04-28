@@ -4,3 +4,10 @@ Pressure and wall shear traction changes for a conduit-chamber system are conver
 vertical force histories, using the representation theorem developed in Coppess et al (2022). The source
 histories are then convolved with numerical elastic Green's functions to calculate seismograms for 
 specified receiver positions.
+
+## Download and install
+To install the package, go to the desired directory and use the following command: 
+`git clone git@bitbucket.org:kcoppess/synthetic-seismograms.git`
+Once all of the correct dependencies are installed (see below), the code should be ready to use immediately.
+### Dependencies
+This package has the following dependencies: 
