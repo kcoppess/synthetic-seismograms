@@ -3,6 +3,7 @@ vp = 3.4641016 km/s
 vs = 2 km/s
 rho = 2.7 g/cm^3
 poisson ratio = 0.25
+Q = 200
 
 point source depths (km):
     conduit: 0.50195 3.01
