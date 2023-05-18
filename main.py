@@ -100,7 +100,7 @@ if args.MTGF == 'see main.py':
         if REPRESENTATION == 'PS':
             MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_mt/'
         elif REPRESENTATION == 'ES':
-            MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_mt/1025_interpolated/'
+            MT_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_1km_mt/'
 else:
     MT_GF_FILE = args.MTGF
 
@@ -111,7 +111,7 @@ if args.SFGF == 'see main.py':
         if REPRESENTATION == 'PS':
             SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/halfA_0.50195_sf/'
         elif REPRESENTATION == 'ES':
-            SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_sf/1025_interpolated/'
+            SF_GF_FILE = '/Users/kcoppess/muspelheim/synthetic-seismograms/synthetic-seismograms/greens_functions/halfspace/halfA_conduit/extended_1km_sf/'
 else:
     SF_GF_FILE = args.SFGF
 
