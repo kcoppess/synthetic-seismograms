@@ -1,0 +1,8 @@
+ODEsteadyStateTD10_neutral8s_partial
+/Users/kcoppess/muspelheim/simulation-results/
+CONDUIT
+PS
+FORCE
+VEL
+-p
+-s/Users/kcoppess/muspelheim/synthetic-seismograms/seismos/fluctuating_frag/

@@ -40,21 +40,21 @@ parser.add_argument('der', help='ACC (returns acceleration seismograms), VEL (ve
 parser.add_argument('-s', '--save', default='no saving',
                     help='path to directory where synthetic seismograms and force/moment histories are saved')
 parser.add_argument('-p', '--plot', action='store_true', help='display plot of synthetic seismograms')
-parser.add_argument('--total_time', default=1500, type=float,
+parser.add_argument('-total_time', default=730, type=float,
                     help='total time in seconds for synthetic seismograms')
-parser.add_argument('--dt', default=0.04, type=float,
+parser.add_argument('-dt', default=0.04, type=float,
                     help='time step size in seconds (needs to be >= GF time step size)')
-parser.add_argument('--MTGF', default='see main.py',
+parser.add_argument('-MTGF', default='see main.py',
                     help='path to directory storing moment tensor Greens functions')
-parser.add_argument('--SFGF', default='see main.py',
+parser.add_argument('-SFGF', default='see main.py',
                     help='path to directory storing single force Greens functions')
-parser.add_argument('--sourcedepth', default=-173, type=float, 
+parser.add_argument('-sourcedepth', default=-173, type=float, 
         help='depth of point source in meters (assumes on z-axis; only relevant for frankenstein analytical calculation): 500m (conduit) or 1028.794m (chamber)')
-parser.add_argument('--chamvol', default=1e5, type=float, 
+parser.add_argument('-chamvol', default=1e5, type=float, 
                     help='magma chamber volume in m^3')
-parser.add_argument('--condrad', default=30, type=float,
+parser.add_argument('-condrad', default=50, type=float,
                     help='cylindrical conduit radius in meters')
-parser.add_argument('--stations', default='station_pos.txt', 
+parser.add_argument('-stations', default='station_pos.txt', 
                     help='file with station labels and coordinates with origin at center of conduit vent')
 
 args = parser.parse_args()

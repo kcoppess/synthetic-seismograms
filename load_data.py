@@ -31,7 +31,11 @@ def moment_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME, dt):
     time1 = time2[:t_index]
     # in conduit flow code, this takes up to be positive z and
     # bottom of conduit is at z = 0
-    height = np.loadtxt(io.BytesIO(directory.read('height.txt')), delimiter=',')
+    try:
+        height = np.loadtxt(io.BytesIO(directory.read('height.txt')), delimiter=',')
+    except:
+        depth = np.loadtxt(io.BytesIO(directory.read('depth.txt')), delimiter=',')
+        height = -np.flip(depth) - 150
 
     if SOURCE_TYPE == 'CONDUIT':
         p1 = np.loadtxt(io.BytesIO(directory.read('pressure.txt')), delimiter=',')[:,:t_index]
@@ -87,7 +91,11 @@ def force_ZIP_load(ZIPFILE, SOURCE_TYPE, TOTAL_TIME, dt):
     time1 = time2[:t_index]
     # in conduit flow code, this takes up to be positive z and
     # bottom of conduit is at z = 0
-    height = np.loadtxt(io.BytesIO(directory.read('height.txt')), delimiter=',')
+    try:
+        height = np.loadtxt(io.BytesIO(directory.read('height.txt')), delimiter=',')
+    except:
+        depth = np.loadtxt(io.BytesIO(directory.read('depth.txt')), delimiter=',')
+        height = -np.flip(depth) - 150
 
     if SOURCE_TYPE == 'CONDUIT':
         f1 = np.loadtxt(io.BytesIO(directory.read('wall_trac.txt')), delimiter=',')[:,:t_index]
