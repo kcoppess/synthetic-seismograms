@@ -40,7 +40,7 @@ parser.add_argument('der', help='ACC (returns acceleration seismograms), VEL (ve
 parser.add_argument('-s', '--save', default='no saving',
                     help='path to directory where synthetic seismograms and force/moment histories are saved')
 parser.add_argument('-p', '--plot', action='store_true', help='display plot of synthetic seismograms')
-parser.add_argument('-total_time', default=730, type=float,
+parser.add_argument('-total_time', default=750, type=float,
                     help='total time in seconds for synthetic seismograms')
 parser.add_argument('-dt', default=0.04, type=float,
                     help='time step size in seconds (needs to be >= GF time step size)')
@@ -198,11 +198,11 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
     if REPRESENTATION == 'PS':
         r_mom, z_mom, tr_mom, moment = PS.moment_general(SOURCE_TYPE, p, height, time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, deriv=DERIV,
-                                                INTERPOLATE=True, SOURCE_FILTER=True)
+                                                INTERPOLATE=True, SOURCE_FILTER=False)
     elif REPRESENTATION == 'ES':
         r_mom, z_mom, tr_mom, moment = ES.moment_general(p, np.flip(height), time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, deriv=DERIV,
-                                                INTERPOLATE=True, SOURCE_FILTER=True, SAVES=False, mt_savefile=MT_GF_FILE)
+                                                INTERPOLATE=True, SOURCE_FILTER=False, SAVES=False, mt_savefile=MT_GF_FILE)
 
     gc.collect()
     if SAVE:
@@ -219,11 +219,11 @@ if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
     if REPRESENTATION == 'PS':
         r_for, z_for, tr_for, force = PS.force_general(SOURCE_TYPE, f, height, time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, deriv=DERIV,
-                                                INTERPOLATE=True, SOURCE_FILTER=True)
+                                                INTERPOLATE=True, SOURCE_FILTER=False)
     elif REPRESENTATION == 'ES':
         r_for, z_for, tr_for, force = ES.force_general(f, np.flip(height), time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, deriv=DERIV,
-                                                INTERPOLATE=True, SOURCE_FILTER=True, SAVES=False, sf_savefile=SF_GF_FILE)
+                                                INTERPOLATE=True, SOURCE_FILTER=False, SAVES=False, sf_savefile=SF_GF_FILE)
     gc.collect()
     if SAVE:
         np.savetxt(save_file+'FORCE.gz', force, delimiter=',')
@@ -265,17 +265,18 @@ if PLOT:
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, sharex = True, sharey = False, figsize=(10,10))
     ax1, ax2, ax3 = hp.seismogram_plot_setup([ax1, ax2, ax3], 'single-source: '+SOURCE_TYPE+' '+CONTRIBUTION+' '+DEPTH)
 
-    for ii in range(nn):
+    for ii in range(nn-2, nn-1):
         ax1.plot(time, r[ii], color=colors[ii], linestyle=line_styles[0], label=labels[ii], linewidth=1.5)
     ax1.set_ylabel('radial ($r$)')
     ax1.set_xlim(0, np.max(time))
     ax1.legend()
 
-    for ii in range(nn):
+    #for ii in range(nn):
+    for ii in range(nn-2, nn-1):
         ax2.plot(time, tr[ii], color=colors[ii], linestyle=line_styles[0], linewidth=1.5)
     ax2.set_ylabel('transverse ($\phi$)')
 
-    for ii in range(nn):
+    for ii in range(nn-2, nn-1):
         ax3.plot(time, z[ii], color=colors[ii], linestyle=line_styles[0], linewidth=1.5)
     ax3.set_xlabel('time (s)')
     ax3.set_ylabel('vertical ($\\theta$)')

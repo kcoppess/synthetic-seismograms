@@ -1,0 +1,17 @@
+homogeneous elastic halfspace
+vp = 3.4641016 km/s
+vs = 2 km/s
+rho = 2.7 g/cm^3
+poisson ratio = 0.25
+Q = 200
+
+point source depths (km):
+    conduit: 0.50195 3.01
+    chamber: 1.028794 1.062035 1.133650 1.287941 1.620350
+extended source depth range (km): 0 - 1 OR 0 - 6
+
+station distances (km): 1, 3, 10, 30
+
+units for Green's functions:
+    m/N          for single force
+    m/(N m)      for moment tensor
