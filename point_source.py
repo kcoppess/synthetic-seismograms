@@ -120,11 +120,11 @@ def moment_general(SOURCE_TYPE, pressure, depths, time, stationPos, stations, so
 
     # setting up low-pass filter to eliminate high frequency numerical effects
     nyq_freq = 0.5 / dt  # in Hz
-    cutoff_freq = 0.03  # in Hz
+    cutoff_freq = 0.02  # in Hz
     normal_cutoff = cutoff_freq / nyq_freq
     b, a = sg.butter(3, normal_cutoff, btype='low', analog=False)
 
-    SHIFT = 5000
+    SHIFT = 15000
 
     if SOURCE_TYPE == 'CONDUIT':
         dmoment_dz = ss.moment_density(pressure, sourceDim, cushion=SHIFT)

@@ -1,8 +1,8 @@
-gaussianPulse_processed
+gaussianPulse_sig16_processed
 /Users/kcoppess/muspelheim/simulation-results/
 CONDUIT
 PS
 FORCE
-DIS
+VEL
 -p
 -s/Users/kcoppess/muspelheim/synthetic-seismograms/seismos/fluctuating_frag/
