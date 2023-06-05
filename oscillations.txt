@@ -1,8 +1,8 @@
-ODEsteadyStateTD10_neutral8s_partial
+gaussianPulse_processed
 /Users/kcoppess/muspelheim/simulation-results/
 CONDUIT
 PS
 FORCE
-VEL
+DIS
 -p
 -s/Users/kcoppess/muspelheim/synthetic-seismograms/seismos/fluctuating_frag/
