@@ -40,7 +40,7 @@ parser.add_argument('der', help='ACC (returns acceleration seismograms), VEL (ve
 parser.add_argument('-s', '--save', default='no saving',
                     help='path to directory where synthetic seismograms and force/moment histories are saved')
 parser.add_argument('-p', '--plot', action='store_true', help='display plot of synthetic seismograms')
-parser.add_argument('-total_time', default=900, type=float,
+parser.add_argument('-total_time', default=1080, type=float,
                     help='total time in seconds for synthetic seismograms')
 parser.add_argument('-dt', default=0.04, type=float,
                     help='time step size in seconds (needs to be >= GF time step size)')
@@ -198,7 +198,7 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
     if REPRESENTATION == 'PS':
         r_mom, z_mom, tr_mom, moment = PS.moment_general(SOURCE_TYPE, p, height, time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, deriv=DERIV,
-                                                INTERPOLATE=True, SOURCE_FILTER=True)
+                                                INTERPOLATE=True, SOURCE_FILTER=False)
     elif REPRESENTATION == 'ES':
         r_mom, z_mom, tr_mom, moment = ES.moment_general(p, np.flip(height), time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, deriv=DERIV,
@@ -219,7 +219,7 @@ if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
     if REPRESENTATION == 'PS':
         r_for, z_for, tr_for, force = PS.force_general(SOURCE_TYPE, f, height, time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, deriv=DERIV,
-                                                INTERPOLATE=True, SOURCE_FILTER=True)
+                                                INTERPOLATE=True, SOURCE_FILTER=False)
     elif REPRESENTATION == 'ES':
         r_for, z_for, tr_for, force = ES.force_general(f, np.flip(height), time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, deriv=DERIV,
