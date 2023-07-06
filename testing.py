@@ -55,7 +55,7 @@ def mt_static_displacement(P, a, f, R):
 
 #gf_file = 'greens_functions/halfspace/halfA_conduit/halfA_0.50195_'
 gf_file = 'greens_functions/halfspace/halfA_chamber/halfA_1.133650_'
-source_depth = 1133.650
+source_depth = 1133.650 #501.95
 chamber_vol = 1e7 #m^3
 stations = ['1km', '3km', '10km', '30km']
 stat_dist = [1000, 3000, 10000, 30000]
@@ -87,10 +87,10 @@ omega = np.fft.fftfreq(tt, dt) * (2 * np.pi)
 
 force_rate_hat = np.fft.fft(force_rate) * dt
 force_rate_hat *= np.exp(1j * omega * time_shift)
-#force = si.cumtrapz(force_rate, x=source_time, initial=0)
+force = si.cumtrapz(force_rate, x=source_time, initial=0)
 
-#plt.plot(source_time, force)
-#plt.show()
+plt.plot(source_time, force)
+plt.show()
 
 
 z_for = np.zeros((nn,tt), dtype='complex')
