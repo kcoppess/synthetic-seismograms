@@ -1,5 +1,5 @@
-gaussianPulse_sig16_processed
-/Users/kcoppess/muspelheim/simulation-results/
+gaussianPulsePBC_sig4_17146processed
+/Users/kcoppess/muspelheim/simulation-results/pressureBC/
 CONDUIT
 PS
 FORCE

@@ -40,7 +40,7 @@ parser.add_argument('der', help='ACC (returns acceleration seismograms), VEL (ve
 parser.add_argument('-s', '--save', default='no saving',
                     help='path to directory where synthetic seismograms and force/moment histories are saved')
 parser.add_argument('-p', '--plot', action='store_true', help='display plot of synthetic seismograms')
-parser.add_argument('-total_time', default=900, type=float,
+parser.add_argument('-total_time', default=650, type=float,
                     help='total time in seconds for synthetic seismograms')
 parser.add_argument('-dt', default=0.04, type=float,
                     help='time step size in seconds (needs to be >= GF time step size)')
