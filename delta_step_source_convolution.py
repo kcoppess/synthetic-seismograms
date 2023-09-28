@@ -50,7 +50,7 @@ if SOURCE == 'STEP':
     omega = np.fft.fftfreq(tt, dt) * (2 * np.pi)
     
     force_rate_hat = np.fft.fft(force_rate) * dt
-    force_rate_hat *= np.exp(1j * omega * time_shift) # shifting to have centered at t=0
+    force_rate_hat *= np.exp(1j * omega * time_shift)
     force = si.cumtrapz(force_rate, x=source_time, initial=0)
 elif SOURCE == 'DELTA':
     sig = 0.1
@@ -61,7 +61,7 @@ elif SOURCE == 'DELTA':
     force_rate = np.gradient(force, source_time)
     
     force_rate_hat = np.fft.fft(force_rate) * dt
-    force_rate_hat *= np.exp(1j * omega * time_shift) # shifting to have centered at t=0
+    force_rate_hat *= np.exp(1j * omega * time_shift)
 
 
 z_for = np.zeros((nn,tt), dtype='complex')
@@ -100,7 +100,7 @@ ax2.set_ylabel('radial (m)')
 ax3.set_xlabel('time (s)')
 ax1.legend()
 
-ax3.plot(source_time-time_shift, force)
+ax3.plot(source_time, force)
 ax3.set_ylabel('force history (N)')
 plt.tight_layout()
 plt.show()
@@ -189,7 +189,7 @@ ax2.set_ylabel('radial (m)')
 ax3.set_xlabel('time (s)')
 ax1.legend()
 
-ax3.plot(source_time-time_shift, moment * moment_tensor[2, 2])
+ax3.plot(source_time, moment * moment_tensor[2, 2])
 ax3.set_ylabel('moment $M_{zz}$ (Nm)')
 plt.tight_layout()
 plt.show()

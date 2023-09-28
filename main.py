@@ -40,7 +40,7 @@ parser.add_argument('der', help='ACC (returns acceleration seismograms), VEL (ve
 parser.add_argument('-s', '--save', default='no saving',
                     help='path to directory where synthetic seismograms and force/moment histories are saved')
 parser.add_argument('-p', '--plot', action='store_true', help='display plot of synthetic seismograms')
-parser.add_argument('-total_time', default=650, type=float,
+parser.add_argument('-total_time', default=14.5*60, type=float,
                     help='total time in seconds for synthetic seismograms')
 parser.add_argument('-dt', default=0.04, type=float,
                     help='time step size in seconds (needs to be >= GF time step size)')
@@ -73,6 +73,12 @@ SOURCE_TYPE = args.stp
 REPRESENTATION = args.rep
 CONTRIBUTION = args.con
 DERIV = args.der
+
+print('----------------------')
+print(directory)
+print('----------------------')
+print(SOURCE_TYPE+' '+CONTRIBUTION+' '+REPRESENTATION+' '+DERIV)
+print('----------------------')
 
 if args.save == 'no saving':
     SAVE = False
@@ -190,11 +196,15 @@ sourcePos = np.array([0,0,-point])
 
 '''------------------------------------------------------------------------------------------'''
 if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
+    if CONTRIBUTION == 'BOTH':
+        print('--MOMENT--')
+    print('loading data...', end='')
     p, time, height = ld.moment_ZIP_load(zip_filename, SOURCE_TYPE, TOTAL_TIME, DT)
-    print('loaded data...')
+    print('done.')
     if TIME_INPUT == 'MANUAL':  # option to manually set moment time series
         p = MOMENT_PRESSURE
         time = MANUAL_TIME
+    print('calculating seismograms...', end='')
     if REPRESENTATION == 'PS':
         r_mom, z_mom, tr_mom, moment = PS.moment_general(SOURCE_TYPE, p, height, time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, deriv=DERIV,
@@ -203,19 +213,25 @@ if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
         r_mom, z_mom, tr_mom, moment = ES.moment_general(p, np.flip(height), time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], MT_GF_FILE, deriv=DERIV,
                                                 INTERPOLATE=True, SOURCE_FILTER=False, SAVES=False, mt_savefile=MT_GF_FILE)
-
+    print('done.')
     gc.collect()
     if SAVE:
+        print('saving data...')
         np.savetxt(save_file+'MOMENT.gz', moment, delimiter=',')
         for ii, LAB in zip(range(nn), labels):
             np.savetxt(save_file+'MOMENT__r'+LAB+'_radial.gz', r_mom[ii], delimiter=',')
             np.savetxt(save_file+'MOMENT__r'+LAB+'_vertical.gz', z_mom[ii], delimiter=',')
             np.savetxt(save_file+'MOMENT__r'+LAB+'_transverse.gz', tr_mom[ii], delimiter=',')
 if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
+    if CONTRIBUTION == 'BOTH':
+        print('--FORCE--')
+    print('loading data...', end='')
     f, time, height = ld.force_ZIP_load(zip_filename, SOURCE_TYPE, TOTAL_TIME, DT)
+    print('done.')
     if TIME_INPUT == 'MANUAL':  # option to manually set force time series
         f = FORCE_PRESSURE
         time = MANUAL_TIME
+    print('calculating seismograms...', end='')
     if REPRESENTATION == 'PS':
         r_for, z_for, tr_for, force = PS.force_general(SOURCE_TYPE, f, height, time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, deriv=DERIV,
@@ -224,8 +240,10 @@ if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
         r_for, z_for, tr_for, force = ES.force_general(f, np.flip(height), time, pos, labels, 
                                                 [sourceDim, sourcePos], [mu, lame, rho_rock], SF_GF_FILE, deriv=DERIV,
                                                 INTERPOLATE=True, SOURCE_FILTER=False, SAVES=False, sf_savefile=SF_GF_FILE)
+    print('done.')
     gc.collect()
     if SAVE:
+        print('saving data...')
         np.savetxt(save_file+'FORCE.gz', force, delimiter=',')
         for ii, LAB in zip(range(nn), labels):
             np.savetxt(save_file+'FORCE__r'+LAB+'_radial.gz', r_for[ii], delimiter=',')
@@ -235,27 +253,26 @@ if SAVE:
     np.savetxt(direc+'TIME.gz', time, delimiter=',')
 gc.collect()
 
-r = np.zeros((nn, len(time)), dtype='complex')
-z = np.zeros((nn, len(time)), dtype='complex')
-tr = np.zeros((nn, len(time)), dtype='complex')
+r = np.zeros((nn, len(time)))
+z = np.zeros((nn, len(time)))
+tr = np.zeros((nn, len(time)))
 
 if CONTRIBUTION == 'MOMENT' or CONTRIBUTION == 'BOTH':
-    r += r_mom
+    r += np.real(r_mom)
     gc.collect()
-    z += z_mom
+    z += np.real(z_mom)
     gc.collect()
-    tr += tr_mom
+    tr += np.real(tr_mom)
     gc.collect()
 if CONTRIBUTION == 'FORCE' or CONTRIBUTION == 'BOTH':
-    r += r_for
+    r += np.real(r_for)
     gc.collect()
-    z += z_for
+    z += np.real(z_for)
     gc.collect()
-    tr += tr_for
+    tr += np.real(tr_for)
     gc.collect()
 
-
-print(SOURCE_TYPE+' '+CONTRIBUTION+' '+REPRESENTATION+' '+DERIV)
+print('-------FINISHED-------')
 
 '''plotting combined waveform'''
 if PLOT:

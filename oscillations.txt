@@ -1,8 +1,8 @@
-gaussianPulsePBC_sig4_17146processed
+fractal4s_processed
 /Users/kcoppess/muspelheim/simulation-results/pressureBC/
 CONDUIT
 PS
-FORCE
+BOTH
 VEL
 -p
 -s/Users/kcoppess/muspelheim/synthetic-seismograms/seismos/fluctuating_frag/
